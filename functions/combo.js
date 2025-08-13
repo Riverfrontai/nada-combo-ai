@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const MENU_PATH = path.join(__dirname, 'assets', 'nada_menu.json');
+// Robust: resolve from function CWD which is /var/task in Netlify
+const MENU_PATH = path.resolve(process.cwd(), 'assets', 'nada_menu.json');
 
 function loadMenu(){
   const raw = fs.readFileSync(MENU_PATH,'utf8');
@@ -37,6 +38,7 @@ function buildPrompt(menu, prefs){
 async function callOpenAI(prompt){
   const apiKey = process.env.OPENAI_API_KEY;
   if(!apiKey){
+    console.error('Missing OPENAI_API_KEY');
     throw new Error('OPENAI_API_KEY not configured');
   }
   const resp = await fetch('https://api.openai.com/v1/chat/completions',{
@@ -44,11 +46,14 @@ async function callOpenAI(prompt){
     headers:{ 'Authorization': `Bearer ${apiKey}`, 'Content-Type':'application/json' },
     body: JSON.stringify({ model: 'gpt-4o-mini', messages: [ { role: 'system', content: 'Respond with valid JSON only. No prose. If unsure, return an empty recommendations array.' }, { role: 'user', content: prompt } ], temperature: 0.7, max_tokens: 600, response_format: { type: 'json_object' } })
   });
-  if(!resp.ok){ const t = await resp.text(); throw new Error(`OpenAI error ${resp.status}: ${t}`); }
-  const data = await resp.json();
-  const text = data.choices?.[0]?.message?.content || '{"recommendations":[]}'
+  const txt = await resp.text();
+  console.log('OpenAI status', resp.status, txt.slice(0,400));
+  if(!resp.ok){
+    if (resp.status === 429) return { recommendations: [], error: 'rate-limit' };
+    throw new Error(`OpenAI error ${resp.status}`);
+  }
   try {
-    return JSON.parse(text);
+    return JSON.parse(txt);
   } catch (e) {
     return { recommendations: [] };
   }
@@ -81,7 +86,10 @@ exports.handler = async (event) => {
     const fullMenu = loadMenu();
     const scoped = prefilter(fullMenu, prefs);
     const prompt = buildPrompt(scoped, prefs);
-    const result = await callOpenAI(prompt);
+
+    const ai = await callOpenAI(prompt);
+    const result = ai && ai.recommendations ? ai : { recommendations: [] };
+
     if(Array.isArray(result.recommendations)){
       result.recommendations.forEach(rec=>{
         if(!rec.estimatePerPerson){ rec.estimatePerPerson = '—'; }
@@ -94,7 +102,7 @@ exports.handler = async (event) => {
       body: JSON.stringify(result)
     };
   }catch(err){
-    console.error(err);
+    console.error(err && err.stack ? err.stack : err);
     return { statusCode: 500, body: 'Internal Server Error' };
   }
 }
