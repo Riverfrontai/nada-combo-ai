@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const MENU_PATH = path.join(__dirname, '..', 'assets', 'nada_menu.json');
+const MENU_PATH = path.join(__dirname, 'assets', 'nada_menu.json');
 
 function loadMenu(){
   const raw = fs.readFileSync(MENU_PATH,'utf8');
