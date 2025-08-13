@@ -55,6 +55,8 @@ function buildRuleCombos(menu, prefs){
   const soups     = menu.soup_salad || [];
   const ques      = menu.quesadillas || [];
   const fajitas   = menu.fajitas || [];
+  const entrees   = menu.entrees || [];
+  const desserts  = menu.desserts || [];
 
   // Tag preferences by time slot
   const prefTags = {
@@ -70,6 +72,33 @@ function buildRuleCombos(menu, prefs){
     return pick(withPref.length ? withPref : arr);
   };
 
+  // Brunch-first templates
+  if (entrees.length) {
+    const a = {
+      title: 'Brunch Favorite',
+      tags: ['balanced','rule-based', slot, isWeekend?'weekend':'weekday'],
+      items: [],
+      rationale: `Balanced for ${prefs.dayOfWeek} ${slot.replace('_',' ')}.`
+    };
+    const e1 = pickBy(entrees); if (e1) a.items.push({ category: 'Entree', name: e1.name });
+    const s1 = pickBy(sides);   if (s1) a.items.push({ category: 'Side', name: s1.name });
+    a.items.push({ category: 'Drink', name: alcohol === 'na' ? 'Nada Lemonade' : 'Nadarita' });
+    combos.push(a);
+
+    const b = {
+      title: 'Light & Fresh Brunch',
+      tags: ['fresh','rule-based', slot, isWeekend?'weekend':'weekday'],
+      items: [],
+      rationale: `Leaning fresh and easy for ${slot.replace('_',' ')}.`
+    };
+    const e2 = pickBy(entrees); if (e2) b.items.push({ category: 'Entree', name: e2.name });
+    if (desserts.length) { const d = pickBy(desserts); if (d) b.items.push({ category: 'Dessert', name: d.name }); }
+    combos.push(b);
+
+    return combos.filter(c => c.items.length >= 2);
+  }
+
+  // Dinner/Lunch templates
   // Combo A: Starter + Taco Pair + Side + Drink
   const a = {
     title: slot === 'lunch' ? 'Midday First‑Timer' : 'First‑Timer Flight',
@@ -77,11 +106,11 @@ function buildRuleCombos(menu, prefs){
     items: [],
     rationale: `Optimized for ${prefs.dayOfWeek} ${slot.replace('_',' ')}—balanced textures and flavors.`
   };
-  const starter = pickBy(antojitos); if (starter) a.items.push({ category: 'Antojitos', name: starter.name });
-  const tacoA = pickBy(tacos); if (tacoA) a.items.push({ category: 'Tacos', name: tacoA.name, note: 'pair' });
-  const sideA = pickBy(sides); if (sideA) a.items.push({ category: 'Side', name: sideA.name });
+  const st = pickBy(antojitos); if (st) a.items.push({ category: 'Antojitos', name: st.name });
+  const tt = pickBy(tacos);     if (tt) a.items.push({ category: 'Tacos', name: tt.name, note: 'pair' });
+  const ss = pickBy(sides);     if (ss) a.items.push({ category: 'Side', name: ss.name });
   a.items.push({ category: 'Drink', name: alcohol === 'na' ? 'Nada Lemonade' : 'Nadarita' });
-  combos.push(a);
+  if (a.items.length >= 2) combos.push(a);
 
   // Combo B: Soup/Salad + Tacos + Side
   const b = {
@@ -90,22 +119,34 @@ function buildRuleCombos(menu, prefs){
     items: [],
     rationale: `Lighter set for ${slot.replace('_',' ')}, leaning fresh.`
   };
-  const soupB = pickBy(soups); if (soupB) b.items.push({ category: 'Soup/Salad', name: soupB.name });
-  const tacoB = pickBy(tacos); if (tacoB) b.items.push({ category: 'Tacos', name: tacoB.name, note: 'pair' });
-  const sideB = pickBy(sides); if (sideB) b.items.push({ category: 'Side', name: sideB.name });
-  combos.push(b);
+  const ssp = pickBy(soups); if (ssp) b.items.push({ category: 'Soup/Salad', name: ssp.name });
+  const tt2 = pickBy(tacos); if (tt2) b.items.push({ category: 'Tacos', name: tt2.name, note: 'pair' });
+  const ss2 = pickBy(sides); if (ss2) b.items.push({ category: 'Side', name: ss2.name });
+  if (b.items.length >= 2) combos.push(b);
 
   // Combo C (for 2+): Shareable + Fajitas
-  if (party >= 2 && fajitas.length) {
+  if (party >= 2 && (fajitas.length || antojitos.length)) {
     const c = {
       title: isWeekend ? 'Weekend Share & Sizzle' : 'Share & Sizzle',
       tags: ['shareable','rule-based', slot, isWeekend?'weekend':'weekday'],
       items: [],
       rationale: `Great for ${isWeekend?'weekends':'evenings'}—shareables and sizzling main.`
     };
-    const starterC = pickBy(antojitos); if (starterC) c.items.push({ category: 'Antojitos', name: starterC.name });
-    const faj = pickBy(fajitas); if (faj) c.items.push({ category: 'Fajitas', name: faj.name });
-    combos.push(c);
+    const st2 = pickBy(antojitos); if (st2) c.items.push({ category: 'Antojitos', name: st2.name });
+    const fj = pickBy(fajitas); if (fj) c.items.push({ category: 'Fajitas', name: fj.name });
+    if (c.items.length >= 2) combos.push(c);
+  }
+
+  // Optional dessert variant if available
+  if (Array.isArray(desserts) && desserts.length) {
+    const d = {
+      title: 'Sweet Finish',
+      tags: ['dessert','rule-based', slot],
+      items: [],
+      rationale: 'A sweet ending to balance the set.'
+    };
+    const d1 = pickBy(desserts); if (d1) d.items.push({ category: 'Dessert', name: d1.name });
+    if (d.items.length) combos.push(d);
   }
 
   return combos;
@@ -151,6 +192,8 @@ function defaultPrice(cat){
     case 'fajitas': return 30;
     case 'quesadillas': return 12;
     case 'enchiladas': return 16;
+    case 'desserts': return 9;
+    case 'entrees': return 16;
     case 'drink': return 12;
     default: return 12;
   }
@@ -164,6 +207,8 @@ function portionUnits(cat, item){
   if (cat === 'soup_salad') return 0.6;
   if (cat === 'quesadillas') return 0.8;
   if (cat === 'enchiladas') return 1.0;
+  if (cat === 'entrees') return 1.0;
+  if (cat === 'desserts') return 0.5;
   if (cat === 'drink') return 0.0;
   return 0.8;
 }
@@ -181,9 +226,10 @@ function itemsByCategory(menu, alcohol){
     fajitas: menu.fajitas||[],
     quesadillas: menu.quesadillas||[],
     enchiladas: menu.enchiladas||[],
+    desserts: menu.desserts||[],
+    entrees: menu.entrees||[],
     drink: []
   };
-  // drinks are chosen via chooseDrink(), not enumerated
   return map;
 }
 
@@ -285,11 +331,24 @@ function addPick(state, cat, item, prefs){
 
 function generateDeterministic(menu, prefs){
   const cats = itemsByCategory(menu, prefs.alcohol);
-  const templates = [
-    ['antojitos','tacos','sides','drink'],
-    ['soup_salad','tacos','sides','drink'],
-    ['antojitos','fajitas','drink']
-  ];
+  // Choose templates dynamically based on what exists
+  const hasEntrees = Array.isArray(cats.entrees) && cats.entrees.length>0;
+  const hasDesserts = Array.isArray(cats.desserts) && cats.desserts.length>0;
+  let templates;
+  if (hasEntrees) {
+    templates = [
+      ['entrees','sides','drink'],
+      ['entrees','drink']
+    ];
+  } else {
+    templates = [
+      ['antojitos','tacos','sides','drink'],
+      ['soup_salad','tacos','sides','drink'],
+      ['antojitos','fajitas','drink']
+    ];
+    if (hasDesserts) templates.push(['antojitos','tacos','desserts','drink']);
+  }
+
   let candidates = [];
   for (const tpl of templates){
     let beam = [{ picks:[], price:0, portions:0, tags:[], spiceSum:0, spiceCount:0, spiceAvg:2, score:0 }];
@@ -329,20 +388,22 @@ function generateDeterministic(menu, prefs){
 
 function diversify(cands, n){
   const picked = [];
-  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set() };
+  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set(), entrees: new Set() };
   for (const c of cands){
-    const names = { tacos: [], antojitos: [], drink: [] };
+    const names = { tacos: [], antojitos: [], drink: [], entrees: [] };
     for (const p of c.picks){
       if (p.category==='tacos') names.tacos.push(p.name);
       if (p.category==='antojitos') names.antojitos.push(p.name);
       if (p.category==='drink') names.drink.push(p.name);
+      if (p.category==='entrees') names.entrees.push(p.name);
     }
-    const overlap = names.tacos.some(x=>seen.tacos.has(x)) || names.antojitos.some(x=>seen.antojitos.has(x)) || names.drink.some(x=>seen.drink.has(x));
+    const overlap = names.tacos.some(x=>seen.tacos.has(x)) || names.antojitos.some(x=>seen.antojitos.has(x)) || names.drink.some(x=>seen.drink.has(x)) || names.entrees.some(x=>seen.entrees.has(x));
     if (picked.length===0 || !overlap){
       picked.push(c);
       names.tacos.forEach(x=>seen.tacos.add(x));
       names.antojitos.forEach(x=>seen.antojitos.add(x));
       names.drink.forEach(x=>seen.drink.add(x));
+      names.entrees.forEach(x=>seen.entrees.add(x));
     }
     if (picked.length>=n) break;
   }
@@ -357,7 +418,7 @@ function diversify(cands, n){
 
 function prettyCat(c){
   return {
-    antojitos: 'Antojitos', tacos: 'Tacos', sides:'Side', soup_salad:'Soup/Salad', fajitas:'Fajitas', quesadillas:'Quesadillas', enchiladas:'Enchiladas', drink:'Drink'
+    antojitos: 'Antojitos', tacos: 'Tacos', sides:'Side', soup_salad:'Soup/Salad', fajitas:'Fajitas', quesadillas:'Quesadillas', enchiladas:'Enchiladas', desserts:'Dessert', entrees:'Entree', drink:'Drink'
   }[c] || c;
 }
 

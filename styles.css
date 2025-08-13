@@ -18,6 +18,7 @@
 }
 
 *{box-sizing:border-box}
+
 /* Animated background */
 body{
   font-family:var(--font-body);
@@ -66,16 +67,17 @@ h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
     inset 0 1px 0 rgba(255,255,255,.3);
 }
 
-/* Buttons: micro-interaction */
-.btn-primary{
-  background: linear-gradient(135deg,var(--primary-color),#4ea9ff);
-  color:#fff;
-  box-shadow:0 6px 14px rgba(0,132,255,.22);
-  transition: transform .12s ease, box-shadow .12s ease;
-}
+.btn-primary,.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:0;cursor:pointer;text-decoration:none;font-weight:700}
+.btn-primary{background:linear-gradient(135deg,var(--primary-color),#4ea9ff);color:#fff;box-shadow:0 6px 14px rgba(0,132,255,.22);transition: transform .12s ease, box-shadow .12s ease}
+.btn-primary:hover{transform:translateY(-1px)}
 .btn-primary:active{ transform: translateY(1px); box-shadow:0 4px 10px rgba(0,132,255,.2); }
-.btn-secondary{ transition: border-color .12s ease, transform .12s ease; }
-.btn-secondary:active{ transform: translateY(1px); }
+.btn-secondary{background:#fff;border:2px solid var(--border);color:var(--text-primary);transition: border-color .12s ease, transform .12s ease}
+.btn-secondary:hover{border-color:var(--primary-color)}
+.btn-secondary:active{ transform: translateY(1px) }
+
+/* Page layout tweaks */
+.combo-page h1{color:#0b2e59}
+.rec-card{background:#fff}
 
 /* Tags: playful colors */
 .tag{ background:#eef5ff; color:#0b6ee6; }
@@ -84,10 +86,7 @@ h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
 .tag.generated{ background:#f3e8ff; color:#6b21a8; }
 
 /* Result cards: motion */
-.result .rec-card{
-  background:#fff;
-  animation: fadeUp .35s ease both;
-}
+.result .rec-card{ animation: fadeUp .35s ease both; }
 @keyframes fadeUp{ from{opacity:0; transform: translateY(6px)} to{opacity:1; transform: translateY(0)} }
 
 /* Empty state */
@@ -99,28 +98,15 @@ h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
 }
 
 /* Skeletons */
-.skel{
-  display:block; border-radius:10px; background: linear-gradient(90deg,#eef3fa,#f5f8fd,#eef3fa);
-  background-size: 200% 100%; animation: shimmer 1.2s ease-in-out infinite;
-}
+.skel{ display:block; border-radius:10px; background: linear-gradient(90deg,#eef3fa,#f5f8fd,#eef3fa); background-size: 200% 100%; animation: shimmer 1.2s ease-in-out infinite; }
 @keyframes shimmer{ 0%{background-position: 0%} 100%{background-position: 200%} }
 .skel-line{ height:12px; margin:8px 0; }
 .skel-title{ height:18px; width:60%; margin:10px 0; }
 .skel-tag{ height:16px; width:85px; border-radius:999px; display:inline-block; margin-right:6px; }
 
 /* Toast */
-#toast{
-  position: fixed; bottom: 16px; right: 16px; z-index: 60;
-  background: #0b2e59; color:#fff; padding:10px 14px; border-radius:12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.18); opacity:0; transform: translateY(8px);
-  transition: opacity .2s ease, transform .2s ease;
-}
+#toast{ position: fixed; bottom: 16px; right: 16px; z-index: 60; background: #0b2e59; color:#fff; padding:10px 14px; border-radius:12px; box-shadow: 0 8px 20px rgba(0,0,0,.18); opacity:0; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease; }
 #toast.show{ opacity:1; transform: translateY(0); }
 
 /* Confetti container */
 #confetti{ position: fixed; inset:0; pointer-events:none; z-index:70; }
-
-/* Page layout tweaks */
-.combo-page h1{color:#0b2e59}
-.rec-card{background:#fff}
-

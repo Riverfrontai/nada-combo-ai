@@ -13,72 +13,72 @@ let generating = false;
 regen.disabled = true;
 
 const taglines = [
-'Perfect pairings, zero guesswork.',
-'Chef vibes, AI speed.',
-'Fresh, fun, and shareable.',
-'Treat your tastebuds tonight.'
+  'Perfect pairings, zero guesswork.',
+  'Chef vibes, AI speed.',
+  'Fresh, fun, and shareable.',
+  'Treat your tastebuds tonight.'
 ];
 let taglineIdx = 0;
 setInterval(()=>{
-taglineIdx = (taglineIdx+1) % taglines.length;
-if(taglineEl) taglineEl.textContent = taglines[taglineIdx];
+  taglineIdx = (taglineIdx+1) % taglines.length;
+  if(taglineEl) taglineEl.textContent = taglines[taglineIdx];
 }, 4000);
 
 function showToast(msg){
-if(!toast) return;
-toast.textContent = msg;
-toast.classList.add('show');
-setTimeout(()=>toast.classList.remove('show'), 1800);
+  if(!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 1800);
 }
 
 function renderSkeleton(){
-results.innerHTML = '';
-for(let i=0;i<3;i++){
+  results.innerHTML = '';
+  for(let i=0;i<3;i++){
     const card = el('div','rec-card');
     const t = el('div','skel skel-title'); card.appendChild(t);
     const tagWrap = el('div'); for(let k=0;k<3;k++){ const s=el('span','skel skel-tag'); tagWrap.appendChild(s);} card.appendChild(tagWrap);
-  for(let j=0;j<3;j++){ const ln=el('div','skel skel-line'); card.appendChild(ln); }
-  results.appendChild(card);
-}
+    for(let j=0;j<3;j++){ const ln=el('div','skel skel-line'); card.appendChild(ln); }
+    results.appendChild(card);
+  }
 }
 
 function renderResults(payload, data){
-results.innerHTML = '';
-if(!data || !Array.isArray(data.recommendations) || data.recommendations.length===0){
-  const d = el('div','muted small'); d.textContent = 'No combos generated.'; results.appendChild(d); return;
-}
-data.recommendations.forEach((rec, idx)=>{
-const card = el('div','rec-card');
-  const title = el('h4'); title.textContent = rec.title || 'Chef-picked Combo'; card.appendChild(title);
-  if(rec.tags){
-    const tags = el('div');
-    const engine = rec.tags.includes('generated') ? 'AI' : (rec.tags.includes('rule-based') ? 'Rule' : 'Chef');
-  const eng = el('span','tag ' + (engine==='AI'?'ai':engine==='Rule'?'rule':'generated')); eng.textContent = engine; tags.appendChild(eng);
-  rec.tags.forEach(t=>{ const b=el('span','tag'); b.textContent = t; tags.appendChild(b); });
-  card.appendChild(tags);
-}
-  const ul = el('ul');
-  (rec.items||[]).forEach(item=>{
-    const li = el('li');
-    li.textContent = `${item.category}: ${item.name}` + (item.note?` — ${item.note}`:'');
+  results.innerHTML = '';
+  if(!data || !Array.isArray(data.recommendations) || data.recommendations.length===0){
+    const d = el('div','muted small'); d.textContent = 'No combos generated.'; results.appendChild(d); return;
+  }
+  data.recommendations.forEach((rec, idx)=>{
+    const card = el('div','rec-card');
+    const title = el('h4'); title.textContent = rec.title || 'Chef-picked Combo'; card.appendChild(title);
+    if(rec.tags){
+      const tags = el('div');
+      const engine = rec.tags.includes('generated') ? 'AI' : (rec.tags.includes('rule-based') ? 'Rule' : 'Chef');
+      const eng = el('span','tag ' + (engine==='AI'?'ai':engine==='Rule'?'rule':'generated')); eng.textContent = engine; tags.appendChild(eng);
+      rec.tags.forEach(t=>{ const b=el('span','tag'); b.textContent = t; tags.appendChild(b); });
+      card.appendChild(tags);
+    }
+    const ul = el('ul');
+    (rec.items||[]).forEach(item=>{
+      const li = el('li');
+      li.textContent = `${item.category}: ${item.name}` + (item.note?` — ${item.note}`:'');
       ul.appendChild(li);
     });
     card.appendChild(ul);
-  const p = el('div','small');
-  p.textContent = `Est. per person: ${rec.estimatePerPerson ?? '—'} | Est. total: ${rec.estimateTotal ?? '—'}`;
-  card.appendChild(p);
-const r = el('div','muted small'); r.textContent = rec.rationale || ''; card.appendChild(r);
-card.style.animationDelay = `${idx*60}ms`;
-results.appendChild(card);
-});
+    const p = el('div','small');
+    p.textContent = `Est. per person: ${rec.estimatePerPerson ?? '—'} | Est. total: ${rec.estimateTotal ?? '—'}`;
+    card.appendChild(p);
+    const r = el('div','muted small'); r.textContent = rec.rationale || ''; card.appendChild(r);
+    card.style.animationDelay = `${idx*60}ms`;
+    results.appendChild(card);
+  });
 }
 
 function burstConfetti(){
-if(!confettiRoot) return;
-const N=18;
-for(let i=0;i<N;i++){
-  const piece = el('div');
-  const s = 6 + Math.random()*6;
+  if(!confettiRoot) return;
+  const N=18;
+  for(let i=0;i<N;i++){
+    const piece = el('div');
+    const s = 6 + Math.random()*6;
     const x = 10 + Math.random()*80;
     const dur = 700 + Math.random()*700;
     piece.style.cssText = `position:absolute;top:-10px;left:${x}%;width:${s}px;height:${s}px;border-radius:2px;background:hsl(${Math.random()*360},80%,60%);opacity:.9;transform:translateY(0);`;
@@ -105,7 +105,7 @@ async function generate(payload){
   const min = 400 - (Date.now() - start); if (min > 0) await new Promise(r=>setTimeout(r,min));
   if(!resp.ok){
     txt = await resp.text();
-    results.innerHTML = `<div class=\"muted small\">Error: ${resp.status} ${txt}</div>`;
+    results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`;
     generating = false; regen.disabled = false; return;
   }
   const data = await resp.json();
@@ -115,6 +115,9 @@ async function generate(payload){
   generating = false;
   regen.disabled = false;
 }
+
+const dietSel = form ? form.querySelector('select[name="diet"]') : null;
+if(dietSel){ dietSel.title = 'Hold Ctrl/Cmd to select multiple'; }
 
 form.addEventListener('submit', (e)=>{
   e.preventDefault();
