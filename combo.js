@@ -1,0 +1,65 @@
+function qs(sel){return document.querySelector(sel)}
+function el(tag, cls){const e=document.createElement(tag); if(cls) e.className=cls; return e}
+
+const form = qs('#combo-form');
+const results = qs('#results');
+const regen = qs('#regen');
+let lastPayload = null;
+regen.disabled = true;
+const dietSel = form ? form.querySelector('select[name="diet"]') : null;
+if(dietSel){ dietSel.title = 'Hold Ctrl/Cmd to select multiple'; }
+
+function renderResults(payload, data){
+  results.innerHTML = '';
+  if(!data || !Array.isArray(data.recommendations) || data.recommendations.length===0){
+    const d = el('div','muted small'); d.textContent = 'No combos generated.'; results.appendChild(d); return;
+  }
+  data.recommendations.forEach(rec=>{
+    const card = el('div','rec-card');
+    const title = el('h4'); title.textContent = rec.title; card.appendChild(title);
+    if(rec.tags){
+      const tags = el('div');
+      rec.tags.forEach(t=>{ const b=el('span','tag'); b.textContent = t; tags.appendChild(b); });
+      card.appendChild(tags);
+    }
+    const ul = el('ul');
+    rec.items.forEach(item=>{ const li = el('li'); li.textContent = `${item.category}: ${item.name}` + (item.note?` — ${item.note}`:''); ul.appendChild(li); });
+    card.appendChild(ul);
+    const p = el('div','small');
+    p.textContent = `Est. per person: ${rec.estimatePerPerson ?? '—'} | Est. total: ${rec.estimateTotal ?? '—'}`;
+    card.appendChild(p);
+    const r = el('div','muted small'); r.textContent = rec.rationale || ''; card.appendChild(r);
+    results.appendChild(card);
+  })
+}
+
+async function generate(payload){
+  results.innerHTML = '<div class="muted small">Generating...</div>';
+  const resp = await fetch('/.netlify/functions/combo',{
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+  });
+  if(!resp.ok){
+    const txt = await resp.text();
+    results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`; return;
+  }
+  const data = await resp.json();
+  renderResults(payload, data);
+}
+
+form.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const fd = new FormData(form);
+  const payload = {
+    meal: fd.get('meal'),
+    partySize: Number(fd.get('partySize'))||1,
+    budget: fd.get('budget')? Number(fd.get('budget')): null,
+    diet: fd.getAll('diet'),
+    spice: fd.get('spice'),
+    alcohol: fd.get('alcohol')
+  };
+  lastPayload = payload;
+  regen.disabled = false;
+  generate(payload);
+});
+
+regen.addEventListener('click', ()=>{ if(lastPayload) generate(lastPayload); })

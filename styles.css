@@ -1,0 +1,34 @@
+/* Nada Combo AI — Ocean Blue & White theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@600;700&display=swap');
+
+:root {
+  --primary-color:#0084ff; /* ocean blue */
+  --primary-hover:#006bcc;
+  --primary-light:#e6f2ff;
+  --text-primary:#0f172a;
+  --text-secondary:#475569;
+  --text-muted:#64748b;
+  --text-inverse:#fff;
+  --surface-elevated:#ffffff;
+  --border:#e2e8f0;
+  --radius-md:8px; --radius-lg:12px; --radius-xl:16px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --font-body: Inter, system-ui, Segoe UI, Arial, sans-serif;
+  --font-heading: Montserrat, Inter, system-ui, Segoe UI, Arial, sans-serif;
+}
+
+*{box-sizing:border-box}
+body{font-family:var(--font-body);margin:0;color:var(--text-primary);background:linear-gradient(180deg,#ffffff 0%, #f5faff 100%);} 
+
+h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
+
+.btn-primary,.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:0;cursor:pointer;text-decoration:none;font-weight:700}
+.btn-primary{background:linear-gradient(135deg,var(--primary-color),#4ea9ff);color:#fff;box-shadow:0 6px 14px rgba(0,132,255,.2)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-secondary{background:#fff;border:2px solid var(--border);color:var(--text-primary)}
+.btn-secondary:hover{border-color:var(--primary-color)}
+
+/* Page layout tweaks */
+.combo-page h1{color:#0b2e59}
+.rec-card{background:#fff}
+

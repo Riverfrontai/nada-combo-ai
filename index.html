@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nada Combo AI</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .combo-page { max-width: 900px; margin: 120px auto 80px; padding: 0 20px; }
+    .combo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .combo-card { background: var(--surface-elevated); border:1px solid var(--border); border-radius: var(--radius-xl); padding: 20px; box-shadow: var(--shadow-sm); }
+    .combo-actions { display:flex; gap: 12px; margin-top: 12px; }
+    .result { margin-top: 28px; display:grid; gap:16px; }
+    .rec-card { border:1px solid var(--border); border-radius: var(--radius-lg); padding:16px; }
+    label { font-weight: 600; display:block; margin-bottom: 6px; }
+    input, select { width: 100%; padding:10px; border:1px solid var(--border); border-radius: var(--radius-md); }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; background: var(--primary-light); color: var(--primary-color); font-size: 12px; margin-right:6px; }
+    .muted { color: var(--text-muted); font-size: 14px; }
+    .small { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="combo-page">
+    <h1>Custom Combo Experience — Nada Cincinnati</h1>
+    <p class="muted">Tell us your vibe. We’ll craft 2–3 combos using the real menu, balanced for flavor, diet, and budget.</p>
+
+    <div class="combo-grid">
+      <div class="combo-card">
+        <h3>Your Preferences</h3>
+        <form id="combo-form">
+          <label>Meal</label>
+          <select name="meal">
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="brunch">Brunch</option>
+          </select>
+
+          <label style="margin-top:10px;">Party Size</label>
+          <input type="number" name="partySize" min="1" max="12" value="2" />
+
+          <label style="margin-top:10px;">Budget per Person (USD)</label>
+          <input type="number" name="budget" min="10" max="100" step="1" placeholder="Optional"/>
+
+          <label style="margin-top:10px;">Dietary</label>
+          <select name="diet" multiple size="3">
+            <option value="vegetarian">Vegetarian</option>
+            <option value="gluten">Gluten‑sensitive</option>
+            <option value="seafood_ok">Seafood OK</option>
+          </select>
+
+          <label style="margin-top:10px;">Spice</label>
+          <select name="spice">
+            <option value="mild">Mild</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hot">Hot</option>
+          </select>
+
+          <label style="margin-top:10px;">Alcohol</label>
+          <select name="alcohol">
+            <option value="any">Any</option>
+            <option value="na">Non‑alcoholic</option>
+            <option value="cocktail">Cocktails/Margs</option>
+            <option value="beer">Beer</option>
+            <option value="wine">Wine</option>
+          </select>
+
+          <div class="combo-actions">
+            <button class="btn-primary" type="submit">Generate Combos</button>
+            <button class="btn-secondary" id="regen" type="button">Regenerate</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="combo-card">
+        <h3>Results</h3>
+        <div id="results" class="result">
+          <div class="muted small">No results yet. Generate to see suggestions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="combo.js"></script>
+</body>
+</html>
