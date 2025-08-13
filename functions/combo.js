@@ -31,6 +31,62 @@ function prefilter(menu, prefs){
   return filtered;
 }
 
+function pick(arr){ return Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random()*arr.length)] : null; }
+
+function buildRuleCombos(menu, prefs){
+  const combos = [];
+  const party = prefs.partySize || 2;
+  const alcohol = prefs.alcohol || 'any';
+
+  // Helper getters
+  const antojitos = menu.antojitos || [];
+  const tacos     = menu.tacos || [];
+  const sides     = menu.sides || [];
+  const soups     = menu.soup_salad || [];
+  const ques      = menu.quesadillas || [];
+  const fajitas   = menu.fajitas || [];
+
+  // Combo A: Starter + Taco Pair + Side + Drink
+  const a = {
+    title: 'First‑Timer Flight',
+    tags: ['balanced','rule-based'],
+    items: [],
+    rationale: 'Simple, balanced set picked from the menu when AI is unavailable.'
+  };
+  if (antojitos.length) a.items.push({ category: 'Antojitos', name: pick(antojitos).name });
+  if (tacos.length) a.items.push({ category: 'Tacos', name: pick(tacos).name, note: 'pair' });
+  if (sides.length) a.items.push({ category: 'Side', name: pick(sides).name });
+  a.items.push({ category: 'Drink', name: alcohol === 'na' ? 'Nada Lemonade' : 'Nadarita' });
+  combos.push(a);
+
+  // Combo B: Soup/Salad + Tacos + Side
+  const b = {
+    title: 'Light & Fresh',
+    tags: ['fresh','rule-based'],
+    items: [],
+    rationale: 'Lighter set with soup/salad and fresher taco profile.'
+  };
+  if (soups.length) b.items.push({ category: 'Soup/Salad', name: pick(soups).name });
+  if (tacos.length) b.items.push({ category: 'Tacos', name: pick(tacos).name, note: 'pair' });
+  if (sides.length) b.items.push({ category: 'Side', name: pick(sides).name });
+  combos.push(b);
+
+  // Combo C (for 2+): Shareable + Fajitas
+  if (party >= 2 && fajitas.length) {
+    const c = {
+      title: 'Share & Sizzle',
+      tags: ['shareable','rule-based'],
+      items: [],
+      rationale: 'Shareable starter and sizzling fajitas for the table.'
+    };
+    if (antojitos.length) c.items.push({ category: 'Antojitos', name: pick(antojitos).name });
+    c.items.push({ category: 'Fajitas', name: pick(fajitas).name });
+    combos.push(c);
+  }
+
+  return combos;
+}
+
 function buildPrompt(menu, prefs){
   return `You are a restaurant combo planner for Nada Cincinnati. You MUST ONLY use items from the provided JSON menu. Create 2-3 combos tailored to the preferences. Keep portions reasonable for the party size. Prefer variety of textures/flavors. Respect dietary flags and alcohol preference. Return STRICT JSON only.\n\nSchema:\n{\n  "recommendations": [\n    {\n      "title": string,\n      "tags": string[],\n      "items": [ { "category": string, "name": string, "note"?: string } ],\n      "estimatePerPerson"?: string,\n      "estimateTotal"?: string,\n      "rationale": string\n    }\n  ]\n}\n\nPreferences: ${JSON.stringify(prefs)}\nMenu: ${JSON.stringify(menu)}\n`;
 }
@@ -88,7 +144,12 @@ exports.handler = async (event) => {
     const prompt = buildPrompt(scoped, prefs);
 
     const ai = await callOpenAI(prompt);
-    const result = ai && ai.recommendations ? ai : { recommendations: [] };
+    let result = ai && ai.recommendations ? ai : { recommendations: [] };
+
+    // Fallback: rule-based combos when AI returns nothing
+    if (!Array.isArray(result.recommendations) || result.recommendations.length === 0) {
+      result = { recommendations: buildRuleCombos(scoped, prefs) };
+    }
 
     if(Array.isArray(result.recommendations)){
       result.recommendations.forEach(rec=>{
