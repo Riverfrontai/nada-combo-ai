@@ -10,6 +10,7 @@ const taglineEl = qs('#tagline');
 
 let lastPayload = null;
 let generating = false;
+let variant = 0;
 regen.disabled = true;
 
 const taglines = [
@@ -130,10 +131,17 @@ form.addEventListener('submit', (e)=>{
     budget: fd.get('budget')? Number(fd.get('budget')): null,
     diet: fd.getAll('diet'),
     spice: fd.get('spice'),
-    alcohol: fd.get('alcohol')
+    alcohol: fd.get('alcohol'),
+    _variant: variant
   };
+  variant = (variant + 1) % 100;
   lastPayload = payload;
   generate(payload);
 });
 
-regen.addEventListener('click', ()=>{ if(lastPayload) generate(lastPayload); })
+regen.addEventListener('click', ()=>{
+  if(!lastPayload) return;
+  const payload = { ...lastPayload, _variant: variant };
+  variant = (variant + 1) % 100;
+  generate(payload);
+})

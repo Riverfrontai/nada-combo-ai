@@ -22,7 +22,8 @@ function sanitizeInput(body){
   const alcohol = ['any','na','cocktail','beer','wine'].includes(body.alcohol)? body.alcohol:'any';
   const dayOfWeek = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].includes(body.dayOfWeek) ? body.dayOfWeek : 'Fri';
   const timeSlot = ['lunch','happy_hour','dinner','late'].includes(body.timeSlot) ? body.timeSlot : 'dinner';
-  return { meal, dayOfWeek, timeSlot, partySize, budget, diet, spice, alcohol };
+  const _variant = Number.isFinite(Number(body._variant)) ? Math.max(0, Math.min(99, Number(body._variant))) : 0;
+  return { meal, dayOfWeek, timeSlot, partySize, budget, diet, spice, alcohol, _variant };
 }
 
 function prefilter(menu, prefs){
@@ -213,10 +214,6 @@ function portionUnits(cat, item){
   return 0.8;
 }
 
-function categoryForDrinkChoice(alcohol){
-  return 'drink';
-}
-
 function itemsByCategory(menu, alcohol){
   const map = {
     antojitos: menu.antojitos||[],
@@ -236,14 +233,12 @@ function itemsByCategory(menu, alcohol){
 function chooseDrink(prefs){
   if (prefs.alcohol === 'na') return 'Nada Lemonade';
   const slot = prefs.timeSlot;
-  // simple curated sets by slot
   const happy = ['Nadarita','Sangria Rojo','Rhinegeist Juicy Truth'];
   const dinner = ['Nadarita','Mezcal Margarita','Sangria Blanco'];
   const late = ['Nadarita','Corona','Modelo Especial'];
   const lunch = ['Pink Grapefruit Soda','Topo Chico','Jarritos (grapefruit/mandarin/pineapple)'];
   const pool = slot==='happy_hour'? happy : slot==='late'? late : slot==='lunch'? lunch : dinner;
-  // deterministic pick based on partySize to create variation without randomness
-  const idx = Math.max(0, (prefs.partySize||1)-1) % pool.length;
+  const idx = (Math.max(0, (prefs.partySize||1)-1) + (prefs._variant||0)) % pool.length;
   return pool[idx];
 }
 
@@ -292,7 +287,6 @@ function scoreState(state, prefs){
 }
 
 function feasiblePartial(state, prefs){
-  // quick sanity: portions should not wildly exceed partySize early
   if (state.portions > prefs.partySize*1.6) return false;
   return true;
 }
@@ -329,9 +323,15 @@ function addPick(state, cat, item, prefs){
   return next;
 }
 
+function rotate(arr, k){
+  if (!Array.isArray(arr) || arr.length===0) return arr;
+  const n = arr.length; const off = ((k%n)+n)%n;
+  return arr.slice(off).concat(arr.slice(0,off));
+}
+
 function generateDeterministic(menu, prefs){
   const cats = itemsByCategory(menu, prefs.alcohol);
-  // Choose templates dynamically based on what exists
+  const variant = prefs._variant || 0;
   const hasEntrees = Array.isArray(cats.entrees) && cats.entrees.length>0;
   const hasDesserts = Array.isArray(cats.desserts) && cats.desserts.length>0;
   let templates;
@@ -350,14 +350,16 @@ function generateDeterministic(menu, prefs){
   }
 
   let candidates = [];
-  for (const tpl of templates){
+  for (let tIndex=0; tIndex<templates.length; tIndex++){
+    const tpl = templates[tIndex];
     let beam = [{ picks:[], price:0, portions:0, tags:[], spiceSum:0, spiceCount:0, spiceAvg:2, score:0 }];
-    for (const cat of tpl){
-      const opts = cats[cat]||[];
+    for (let step=0; step<tpl.length; step++){
+      const cat = tpl[step];
+      const base = cats[cat]||[];
+      const opts = cat==='drink' ? base : rotate(base, variant + step + tIndex);
       const next = [];
       for (const s of beam){
-        if (opts.length===0){
-          // drink placeholder using curated choice for context
+        if ((opts||[]).length===0){
           if (cat==='drink'){
             const pseudo = { name: chooseDrink(prefs), tags: [] };
             const s2 = addPick(s, cat, pseudo, prefs);
@@ -374,8 +376,7 @@ function generateDeterministic(menu, prefs){
     }
     candidates.push(...beam.filter(s=>finalFeasible(s,prefs)));
   }
-  // diversify results: avoid repeating same taco and antojito across picks
-  const diversified = diversify(topK(candidates, 20), 3);
+  const diversified = diversify(topK(candidates, 30), 3);
   return diversified.map(s=>({
     title: 'Chef-picked Combo',
     tags: ['generated', prefs.timeSlot, ['Sat','Sun'].includes(prefs.dayOfWeek)?'weekend':'weekday'],
@@ -388,31 +389,33 @@ function generateDeterministic(menu, prefs){
 
 function diversify(cands, n){
   const picked = [];
-  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set(), entrees: new Set() };
+  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set(), entrees: new Set(), soup_salad: new Set() };
   for (const c of cands){
-    const names = { tacos: [], antojitos: [], drink: [], entrees: [] };
+    const names = { tacos: [], antojitos: [], drink: [], entrees: [], soup_salad: [] };
     for (const p of c.picks){
       if (p.category==='tacos') names.tacos.push(p.name);
       if (p.category==='antojitos') names.antojitos.push(p.name);
       if (p.category==='drink') names.drink.push(p.name);
       if (p.category==='entrees') names.entrees.push(p.name);
+      if (p.category==='soup_salad') names.soup_salad.push(p.name);
     }
-    const overlap = names.tacos.some(x=>seen.tacos.has(x)) || names.antojitos.some(x=>seen.antojitos.has(x)) || names.drink.some(x=>seen.drink.has(x)) || names.entrees.some(x=>seen.entrees.has(x));
+    const overlap =
+      names.tacos.some(x=>seen.tacos.has(x)) ||
+      names.antojitos.some(x=>seen.antojitos.has(x)) ||
+      names.drink.some(x=>seen.drink.has(x)) ||
+      names.entrees.some(x=>seen.entrees.has(x)) ||
+      names.soup_salad.some(x=>seen.soup_salad.has(x));
     if (picked.length===0 || !overlap){
       picked.push(c);
       names.tacos.forEach(x=>seen.tacos.add(x));
       names.antojitos.forEach(x=>seen.antojitos.add(x));
       names.drink.forEach(x=>seen.drink.add(x));
       names.entrees.forEach(x=>seen.entrees.add(x));
+      names.soup_salad.forEach(x=>seen.soup_salad.add(x));
     }
     if (picked.length>=n) break;
   }
-  // if not enough, fill from remaining
-  for (const c of cands){
-    if (picked.includes(c)) continue;
-    picked.push(c);
-    if (picked.length>=n) break;
-  }
+  // Do NOT backfill with duplicates; return what we have
   return picked;
 }
 
