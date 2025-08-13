@@ -19,6 +19,9 @@ function renderResults(payload, data){
     const title = el('h4'); title.textContent = rec.title; card.appendChild(title);
     if(rec.tags){
       const tags = el('div');
+      // Engine badge
+      const engine = rec.tags.includes('generated') ? 'Chef-gen' : (rec.tags.includes('rule-based') ? 'Rule-based' : 'AI');
+      const eng = el('span','tag'); eng.textContent = engine; tags.appendChild(eng);
       rec.tags.forEach(t=>{ const b=el('span','tag'); b.textContent = t; tags.appendChild(b); });
       card.appendChild(tags);
     }
@@ -34,10 +37,13 @@ function renderResults(payload, data){
 }
 
 async function generate(payload){
+  const start = Date.now();
   results.innerHTML = '<div class="muted small">Generating...</div>';
   const resp = await fetch('/.netlify/functions/combo',{
     method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
   });
+  const min = 400 - (Date.now() - start);
+  if (min > 0) await new Promise(r=>setTimeout(r,min));
   if(!resp.ok){
     const txt = await resp.text();
     results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`; return;
@@ -51,6 +57,8 @@ form.addEventListener('submit', (e)=>{
   const fd = new FormData(form);
   const payload = {
     meal: fd.get('meal'),
+    dayOfWeek: fd.get('dayOfWeek'),
+    timeSlot: fd.get('timeSlot'),
     partySize: Number(fd.get('partySize'))||1,
     budget: fd.get('budget')? Number(fd.get('budget')): null,
     diet: fd.getAll('diet'),

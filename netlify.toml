@@ -7,11 +7,11 @@
   included_files = ["assets/**"]
 
 [functions.combo]
-  timeout = 26
-  memory = 1024
+  timeout = 40
+  memory = 256
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 [[headers]]
   for = "/*"

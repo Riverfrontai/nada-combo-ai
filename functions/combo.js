@@ -3,10 +3,14 @@ const path = require('path');
 
 // Robust: resolve from function CWD which is /var/task in Netlify
 const MENU_PATH = path.resolve(process.cwd(), 'assets', 'nada_menu.json');
-
+// Cache menu JSON in memory across warm invocations
+let MENU_JSON = null;
 function loadMenu(){
-  const raw = fs.readFileSync(MENU_PATH,'utf8');
-  return JSON.parse(raw);
+  if (!MENU_JSON) {
+    const raw = fs.readFileSync(MENU_PATH,'utf8');
+    MENU_JSON = JSON.parse(raw);
+  }
+  return MENU_JSON;
 }
 
 function sanitizeInput(body){
@@ -16,7 +20,9 @@ function sanitizeInput(body){
   const diet = Array.isArray(body.diet)? body.diet.slice(0,5): [];
   const spice = ['mild','medium','hot'].includes(body.spice)? body.spice:'medium';
   const alcohol = ['any','na','cocktail','beer','wine'].includes(body.alcohol)? body.alcohol:'any';
-  return { meal, partySize, budget, diet, spice, alcohol };
+  const dayOfWeek = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].includes(body.dayOfWeek) ? body.dayOfWeek : 'Fri';
+  const timeSlot = ['lunch','happy_hour','dinner','late'].includes(body.timeSlot) ? body.timeSlot : 'dinner';
+  return { meal, dayOfWeek, timeSlot, partySize, budget, diet, spice, alcohol };
 }
 
 function prefilter(menu, prefs){
@@ -37,6 +43,8 @@ function buildRuleCombos(menu, prefs){
   const combos = [];
   const party = prefs.partySize || 2;
   const alcohol = prefs.alcohol || 'any';
+  const slot = prefs.timeSlot || 'dinner';
+  const isWeekend = ['Sat','Sun'].includes(prefs.dayOfWeek || 'Fri');
 
   // Helper getters
   const antojitos = menu.antojitos || [];
@@ -46,41 +54,54 @@ function buildRuleCombos(menu, prefs){
   const ques      = menu.quesadillas || [];
   const fajitas   = menu.fajitas || [];
 
+  // Tag preferences by time slot
+  const prefTags = {
+    lunch: { prefer: ['fresh','seafood'], avoid: ['creamy'] },
+    happy_hour: { prefer: ['shareable'], avoid: [] },
+    dinner: { prefer: ['creamy','shareable'], avoid: [] },
+    late: { prefer: ['crispy','quick'], avoid: ['heavy'] }
+  }[slot] || { prefer: [], avoid: [] };
+
+  const pickBy = (arr) => {
+    const withPref = arr.filter(i => (i.tags||[]).some(t => prefTags.prefer.includes(t)));
+    return pick(withPref.length ? withPref : arr) || { name: (arr[0]?.name || 'Item') };
+  };
+
   // Combo A: Starter + Taco Pair + Side + Drink
   const a = {
-    title: 'First‑Timer Flight',
-    tags: ['balanced','rule-based'],
+    title: slot === 'lunch' ? 'Midday First‑Timer' : 'First‑Timer Flight',
+    tags: ['balanced','rule-based', slot, isWeekend?'weekend':'weekday'],
     items: [],
-    rationale: 'Simple, balanced set picked from the menu when AI is unavailable.'
+    rationale: `Optimized for ${prefs.dayOfWeek} ${slot.replace('_',' ')}—balanced textures and flavors.`
   };
-  if (antojitos.length) a.items.push({ category: 'Antojitos', name: pick(antojitos).name });
-  if (tacos.length) a.items.push({ category: 'Tacos', name: pick(tacos).name, note: 'pair' });
-  if (sides.length) a.items.push({ category: 'Side', name: pick(sides).name });
+  if (antojitos.length) a.items.push({ category: 'Antojitos', name: pickBy(antojitos).name });
+  if (tacos.length) a.items.push({ category: 'Tacos', name: pickBy(tacos).name, note: 'pair' });
+  if (sides.length) a.items.push({ category: 'Side', name: pickBy(sides).name });
   a.items.push({ category: 'Drink', name: alcohol === 'na' ? 'Nada Lemonade' : 'Nadarita' });
   combos.push(a);
 
   // Combo B: Soup/Salad + Tacos + Side
   const b = {
-    title: 'Light & Fresh',
-    tags: ['fresh','rule-based'],
+    title: slot === 'lunch' ? 'Light & Fresh Lunch' : 'Light & Fresh',
+    tags: ['fresh','rule-based', slot, isWeekend?'weekend':'weekday'],
     items: [],
-    rationale: 'Lighter set with soup/salad and fresher taco profile.'
+    rationale: `Lighter set for ${slot.replace('_',' ')}, leaning fresh.`
   };
-  if (soups.length) b.items.push({ category: 'Soup/Salad', name: pick(soups).name });
-  if (tacos.length) b.items.push({ category: 'Tacos', name: pick(tacos).name, note: 'pair' });
-  if (sides.length) b.items.push({ category: 'Side', name: pick(sides).name });
+  if (soups.length) b.items.push({ category: 'Soup/Salad', name: pickBy(soups).name });
+  if (tacos.length) b.items.push({ category: 'Tacos', name: pickBy(tacos).name, note: 'pair' });
+  if (sides.length) b.items.push({ category: 'Side', name: pickBy(sides).name });
   combos.push(b);
 
   // Combo C (for 2+): Shareable + Fajitas
   if (party >= 2 && fajitas.length) {
     const c = {
-      title: 'Share & Sizzle',
-      tags: ['shareable','rule-based'],
+      title: isWeekend ? 'Weekend Share & Sizzle' : 'Share & Sizzle',
+      tags: ['shareable','rule-based', slot, isWeekend?'weekend':'weekday'],
       items: [],
-      rationale: 'Shareable starter and sizzling fajitas for the table.'
+      rationale: `Great for ${isWeekend?'weekends':'evenings'}—shareables and sizzling main.`
     };
-    if (antojitos.length) c.items.push({ category: 'Antojitos', name: pick(antojitos).name });
-    c.items.push({ category: 'Fajitas', name: pick(fajitas).name });
+    if (antojitos.length) c.items.push({ category: 'Antojitos', name: pickBy(antojitos).name });
+    c.items.push({ category: 'Fajitas', name: pickBy(fajitas).name });
     combos.push(c);
   }
 
@@ -115,6 +136,183 @@ async function callOpenAI(prompt){
   }
 }
 
+// ---------- Deterministic generator (beam search) ----------
+function defaultPrice(cat){
+  switch(cat){
+    case 'antojitos': return 12;
+    case 'tacos': return 14;
+    case 'soup_salad': return 9;
+    case 'sides': return 6;
+    case 'fajitas': return 30;
+    case 'quesadillas': return 12;
+    case 'enchiladas': return 16;
+    case 'drink': return 12;
+    default: return 12;
+  }
+}
+
+function portionUnits(cat, item){
+  if (cat === 'tacos') return 1.0; // pair
+  if (cat === 'fajitas') return 2.0; // for two
+  if (cat === 'sides') return 0.5;
+  if (cat === 'antojitos') return 0.5;
+  if (cat === 'soup_salad') return 0.6;
+  if (cat === 'quesadillas') return 0.8;
+  if (cat === 'enchiladas') return 1.0;
+  if (cat === 'drink') return 0.0;
+  return 0.8;
+}
+
+function categoryForDrinkChoice(alcohol){
+  return 'drink';
+}
+
+function itemsByCategory(menu, alcohol){
+  const map = {
+    antojitos: menu.antojitos||[],
+    tacos: menu.tacos||[],
+    soup_salad: menu.soup_salad||[],
+    sides: menu.sides||[],
+    fajitas: menu.fajitas||[],
+    quesadillas: menu.quesadillas||[],
+    enchiladas: menu.enchiladas||[],
+    drink: []
+  };
+  // drinks: we don't enumerate; price handled by defaultPrice
+  return map;
+}
+
+function varietyScore(tags){
+  const set = new Set(tags);
+  return Math.min(set.size, 6) / 6; // 0..1
+}
+
+function spiceScore(avg, pref){
+  const map = { mild:1, medium:2, hot:3 };
+  const target = map[pref]||2;
+  const diff = Math.abs((avg||2)-target);
+  return Math.max(0, 1 - diff/2); // 1 when match, 0 when far
+}
+
+function contextBoost(state, prefs){
+  const slot = prefs.timeSlot;
+  let boost = 0;
+  const tags = state.tags;
+  const has = t=>tags.includes(t);
+  if (slot==='lunch') { if (has('fresh')) boost+=0.3; if (has('seafood')) boost+=0.2; if (has('creamy')) boost-=0.1; }
+  if (slot==='happy_hour') { if (has('shareable')) boost+=0.4; }
+  if (slot==='dinner') { if (has('creamy')) boost+=0.2; if (has('shareable')) boost+=0.2; }
+  if (slot==='late') { if (has('crispy')) boost+=0.3; }
+  if (['Sat','Sun'].includes(prefs.dayOfWeek)) { if (has('shareable')) boost+=0.2; }
+  return boost;
+}
+
+function scoreState(state, prefs){
+  const v = varietyScore(state.tags);
+  const s = spiceScore(state.spiceAvg, prefs.spice);
+  const portionFit = (()=>{
+    const per = state.portions / Math.max(1, prefs.partySize);
+    const diff = Math.abs(per-1);
+    return Math.max(0, 1 - diff); // perfect at 1.0
+  })();
+  const budgetFit = (()=>{
+    if (!prefs.budget) return 0.8; // neutral if no budget
+    const target = prefs.budget * Math.max(1, prefs.partySize);
+    const diff = Math.abs((state.price||0) - target);
+    const tol = Math.max(10, target*0.2);
+    return Math.max(0, 1 - diff/tol);
+  })();
+  const ctx = contextBoost(state, prefs);
+  return 2.0*v + 1.5*s + 2.0*portionFit + 2.0*budgetFit + ctx - 0.1*state.picks.length;
+}
+
+function feasiblePartial(state, prefs){
+  // quick sanity: portions should not wildly exceed partySize early
+  if (state.portions > prefs.partySize*1.6) return false;
+  return true;
+}
+
+function finalFeasible(state, prefs){
+  const per = state.portions / Math.max(1, prefs.partySize);
+  if (per < 0.7 || per > 1.5) return false;
+  if (prefs.budget){
+    const target = prefs.budget * Math.max(1, prefs.partySize);
+    if (state.price > target*1.5) return false;
+  }
+  return true;
+}
+
+function topK(arr, k){
+  return arr.sort((a,b)=>b.score-a.score).slice(0,k);
+}
+
+function addPick(state, cat, item, prefs){
+  const price = (item.price!=null? item.price : defaultPrice(cat));
+  const portions = (portionUnits(cat, item));
+  const spice = (item.spice!=null? item.spice : 2);
+  const tags = item.tags||[];
+  const next = {
+    picks: state.picks.concat([{category:cat, name:item.name}]),
+    price: (state.price||0)+price,
+    portions: (state.portions||0)+portions,
+    tags: (state.tags||[]).concat(tags),
+    spiceSum: (state.spiceSum||0)+spice,
+    spiceCount: (state.spiceCount||0)+1
+  };
+  next.spiceAvg = next.spiceSum/Math.max(1,next.spiceCount);
+  next.score = scoreState(next, prefs);
+  return next;
+}
+
+function generateDeterministic(menu, prefs){
+  const cats = itemsByCategory(menu, prefs.alcohol);
+  const templates = [
+    ['antojitos','tacos','sides','drink'],
+    ['soup_salad','tacos','sides','drink'],
+    ['antojitos','fajitas','drink']
+  ];
+  let candidates = [];
+  for (const tpl of templates){
+    let beam = [{ picks:[], price:0, portions:0, tags:[], spiceSum:0, spiceCount:0, spiceAvg:2, score:0 }];
+    for (const cat of tpl){
+      const opts = cats[cat]||[];
+      const next = [];
+      for (const s of beam){
+        if (opts.length===0){
+          // allow drink as placeholder with default price
+          if (cat==='drink'){
+            const pseudo = { name: prefs.alcohol==='na' ? 'Nada Lemonade' : 'Nadarita', tags: [] };
+            const s2 = addPick(s, cat, pseudo, prefs);
+            if (feasiblePartial(s2, prefs)) next.push(s2);
+          }
+          continue;
+        }
+        for (const it of opts){
+          const s2 = addPick(s, cat, it, prefs);
+          if (feasiblePartial(s2, prefs)) next.push(s2);
+        }
+      }
+      beam = topK(next.length? next : beam, 20);
+    }
+    candidates.push(...beam.filter(s=>finalFeasible(s,prefs)));
+  }
+  const top = topK(candidates, 3);
+  return top.map(s=>({
+    title: 'Chef-picked Combo',
+    tags: ['generated', prefs.timeSlot, ['Sat','Sun'].includes(prefs.dayOfWeek)?'weekend':'weekday'],
+    items: s.picks.map(p=>({category: prettyCat(p.category), name: p.name})),
+    estimatePerPerson: prefs.partySize? `$${Math.round((s.price||0)/prefs.partySize)}` : '—',
+    estimateTotal: `$${Math.round(s.price||0)}`,
+    rationale: `Balanced variety for ${prefs.dayOfWeek} ${prefs.timeSlot.replace('_',' ')}.`
+  }));
+}
+
+function prettyCat(c){
+  return {
+    antojitos: 'Antojitos', tacos: 'Tacos', sides:'Side', soup_salad:'Soup/Salad', fajitas:'Fajitas', quesadillas:'Quesadillas', enchiladas:'Enchiladas', drink:'Drink'
+  }[c] || c;
+}
+
 // naive in-memory rate limit (best-effort)
 const hits = new Map();
 function rateLimited(ip) {
@@ -143,12 +341,20 @@ exports.handler = async (event) => {
     const scoped = prefilter(fullMenu, prefs);
     const prompt = buildPrompt(scoped, prefs);
 
-    const ai = await callOpenAI(prompt);
-    let result = ai && ai.recommendations ? ai : { recommendations: [] };
+    const useGenExplicit = (process.env.USE_GENERATOR || 'false') === 'true';
+    const useGen = useGenExplicit || !process.env.OPENAI_API_KEY; // auto-fallback if no key
+    let result;
 
-    // Fallback: rule-based combos when AI returns nothing
-    if (!Array.isArray(result.recommendations) || result.recommendations.length === 0) {
-      result = { recommendations: buildRuleCombos(scoped, prefs) };
+    if (useGen) {
+      result = { recommendations: generateDeterministic(scoped, prefs) };
+    } else {
+      const ai = await callOpenAI(prompt);
+      result = ai && ai.recommendations ? ai : { recommendations: [] };
+      if (!Array.isArray(result.recommendations) || result.recommendations.length === 0) {
+        // Fallback: deterministic then simple rule-based if still empty
+        const det = generateDeterministic(scoped, prefs);
+        result = { recommendations: det.length ? det : buildRuleCombos(scoped, prefs) };
+      }
     }
 
     if(Array.isArray(result.recommendations)){
