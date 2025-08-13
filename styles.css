@@ -18,15 +18,107 @@
 }
 
 *{box-sizing:border-box}
-body{font-family:var(--font-body);margin:0;color:var(--text-primary);background:linear-gradient(180deg,#ffffff 0%, #f5faff 100%);} 
+/* Animated background */
+body{
+  font-family:var(--font-body);
+  margin:0;
+  color:var(--text-primary);
+  background: linear-gradient(120deg,#eaf6ff,#f8fbff,#e8f4ff);
+  background-size: 200% 200%;
+  animation: bgShift 12s ease infinite;
+}
+@keyframes bgShift {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
 
 h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
 
-.btn-primary,.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:0;cursor:pointer;text-decoration:none;font-weight:700}
-.btn-primary{background:linear-gradient(135deg,var(--primary-color),#4ea9ff);color:#fff;box-shadow:0 6px 14px rgba(0,132,255,.2)}
-.btn-primary:hover{transform:translateY(-1px)}
-.btn-secondary{background:#fff;border:2px solid var(--border);color:var(--text-primary)}
-.btn-secondary:hover{border-color:var(--primary-color)}
+/* Header */
+.site-header{
+  position: sticky; top:0; z-index: 50;
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,.7);
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 20px;
+}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; color:#0b2e59;}
+.tagline{color:var(--text-muted); font-weight:600}
+
+/* Cards: glassy */
+.combo-card{
+  background: rgba(255,255,255,.85);
+  border:1px solid rgba(226,232,240,.8);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.06),
+    inset 0 1px 0 rgba(255,255,255,.3);
+  transform: translateY(0);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.combo-card:hover{
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.09),
+    inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* Buttons: micro-interaction */
+.btn-primary{
+  background: linear-gradient(135deg,var(--primary-color),#4ea9ff);
+  color:#fff;
+  box-shadow:0 6px 14px rgba(0,132,255,.22);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn-primary:active{ transform: translateY(1px); box-shadow:0 4px 10px rgba(0,132,255,.2); }
+.btn-secondary{ transition: border-color .12s ease, transform .12s ease; }
+.btn-secondary:active{ transform: translateY(1px); }
+
+/* Tags: playful colors */
+.tag{ background:#eef5ff; color:#0b6ee6; }
+.tag.rule{ background:#fff4e6; color:#9a6100; }
+.tag.ai{ background:#eafcf4; color:#007e4f; }
+.tag.generated{ background:#f3e8ff; color:#6b21a8; }
+
+/* Result cards: motion */
+.result .rec-card{
+  background:#fff;
+  animation: fadeUp .35s ease both;
+}
+@keyframes fadeUp{ from{opacity:0; transform: translateY(6px)} to{opacity:1; transform: translateY(0)} }
+
+/* Empty state */
+.empty{ display:flex; gap:14px; align-items:center; padding:12px; color:var(--text-muted)}
+.empty-ill{
+  width:44px;height:44px;border-radius:12px;
+  background: conic-gradient(from 180deg at 50% 50%, #cde8ff, #f2f7ff);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* Skeletons */
+.skel{
+  display:block; border-radius:10px; background: linear-gradient(90deg,#eef3fa,#f5f8fd,#eef3fa);
+  background-size: 200% 100%; animation: shimmer 1.2s ease-in-out infinite;
+}
+@keyframes shimmer{ 0%{background-position: 0%} 100%{background-position: 200%} }
+.skel-line{ height:12px; margin:8px 0; }
+.skel-title{ height:18px; width:60%; margin:10px 0; }
+.skel-tag{ height:16px; width:85px; border-radius:999px; display:inline-block; margin-right:6px; }
+
+/* Toast */
+#toast{
+  position: fixed; bottom: 16px; right: 16px; z-index: 60;
+  background: #0b2e59; color:#fff; padding:10px 14px; border-radius:12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.18); opacity:0; transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+#toast.show{ opacity:1; transform: translateY(0); }
+
+/* Confetti container */
+#confetti{ position: fixed; inset:0; pointer-events:none; z-index:70; }
 
 /* Page layout tweaks */
 .combo-page h1{color:#0b2e59}

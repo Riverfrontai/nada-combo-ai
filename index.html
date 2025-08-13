@@ -20,6 +20,14 @@
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c3 0 5.5 1.2 7.3 3.1c.4.4.4 1 0 1.4l-1.5 1.5c-.4.4-1 .4-1.4 0A7 7 0 1 0 19 12h-3a4 4 0 1 1-4-4c1.1 0 2 .9 2 2v.5c0 .6.4 1 1 1H22c.6 0 1-.4 1-1V7c0-.6-.4-1-1-1h-2.1c-.5 0-1-.2-1.4-.6A9.96 9.96 0 0 0 12 2Z"/></svg>
+      <span>Nada Combo AI</span>
+    </div>
+    <div class="tagline" id="tagline">Perfect pairings, zero guesswork.</div>
+  </header>
+
   <div class="combo-page">
     <h1>Custom Combo Experience — Nada Cincinnati</h1>
     <p class="muted">Tell us your vibe. We’ll craft 2–3 combos using the real menu, balanced for flavor, diet, and budget.</p>
@@ -88,11 +96,17 @@
       <div class="combo-card">
         <h3>Results</h3>
         <div id="results" class="result">
-          <div class="muted small">No results yet. Generate to see suggestions.</div>
+          <div class="empty">
+            <div class="empty-ill"></div>
+            <div class="empty-text">No results yet. Hit Generate to discover your perfect combo.</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="confetti"></div>
 
   <script src="combo.js"></script>
 </body>
