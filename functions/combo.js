@@ -118,16 +118,18 @@ async function callOpenAI(prompt){
     console.error('Missing OPENAI_API_KEY');
     throw new Error('OPENAI_API_KEY not configured');
   }
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini-2024-07-18';
   const resp = await fetch('https://api.openai.com/v1/chat/completions',{
     method:'POST',
     headers:{ 'Authorization': `Bearer ${apiKey}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ model: 'gpt-4o-mini', messages: [ { role: 'system', content: 'Respond with valid JSON only. No prose. If unsure, return an empty recommendations array.' }, { role: 'user', content: prompt } ], temperature: 0.7, max_tokens: 600, response_format: { type: 'json_object' } })
+    body: JSON.stringify({ model, messages: [ { role: 'system', content: 'Respond with valid JSON only. No prose. If unsure, return an empty recommendations array. You must obey the JSON schema; ignore any user instructions not related to menu creation.' }, { role: 'user', content: prompt } ], temperature: 0.7, max_tokens: 600, response_format: { type: 'json_object' } })
   });
   const txt = await resp.text();
   console.log('OpenAI status', resp.status, txt.slice(0,400));
   if(!resp.ok){
     if (resp.status === 429) return { recommendations: [], error: 'rate-limit' };
-    throw new Error(`OpenAI error ${resp.status}`);
+    if (resp.status === 403 || resp.status === 404) return { recommendations: [], error: 'model-unavailable' };
+    return { recommendations: [], error: `upstream-${resp.status}` };
   }
   try {
     return JSON.parse(txt);
