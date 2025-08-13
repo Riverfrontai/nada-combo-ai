@@ -38,18 +38,29 @@ function renderResults(payload, data){
 
 async function generate(payload){
   const start = Date.now();
+  regen.disabled = true; // prevent overlap
   results.innerHTML = '<div class="muted small">Generating...</div>';
-  const resp = await fetch('/.netlify/functions/combo',{
-    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+  let resp;
+  try {
+  resp = await fetch('/.netlify/functions/combo',{
+  method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
   });
-  const min = 400 - (Date.now() - start);
-  if (min > 0) await new Promise(r=>setTimeout(r,min));
-  if(!resp.ok){
-    const txt = await resp.text();
-    results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`; return;
+  } catch (e) {
+    results.innerHTML = '<div class="muted small">Network error. Please try again.</div>';
+  regen.disabled = false;
+  return;
   }
-  const data = await resp.json();
-  renderResults(payload, data);
+const min = 400 - (Date.now() - start);
+if (min > 0) await new Promise(r=>setTimeout(r,min));
+if(!resp.ok){
+const txt = await resp.text();
+results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`; 
+regen.disabled = false;
+return;
+}
+const data = await resp.json();
+renderResults(payload, data);
+regen.disabled = false;
 }
 
 form.addEventListener('submit', (e)=>{

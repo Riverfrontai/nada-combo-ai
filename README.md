@@ -21,9 +21,19 @@ nada-combo-ai/
    └─ nada_menu.json
 ```
 
+## Local development
+- Install Netlify CLI: `npm i -g netlify-cli`
+- Run locally: `netlify dev`
+- With OpenAI: `netlify dev --env OPENAI_API_KEY=sk-...` (or set it in your shell)
+- Force deterministic generator: set `USE_GENERATOR=true`
+- Node 20 recommended locally to mirror functions runtime
+
 ## Deploy to Netlify
-1. Create a new site and point it to this folder (or zip and drag-drop)
-2. Environment variables → add `OPENAI_API_KEY`
+1. Create a new site and point it to this folder (or connect Git repo)
+2. Environment variables → add as needed:
+   - `OPENAI_API_KEY` (optional if using AI)
+   - `OPENAI_MODEL` (default `gpt-4o-mini-2024-07-18`)
+   - `USE_GENERATOR` (`true` to prefer deterministic combos)
 3. Publish directory: `.` (root of this folder)
 4. Functions directory: `functions` (configured in `netlify.toml`)
 
