@@ -1,21 +1,22 @@
 {
-  "version": "1.0",
+  "version": "2.0",
+  "source": "Nadamenu.md (structured)",
   "venue": "Nada Cincinnati",
   "meals": {
     "lunch": {
       "tacos": [
-        {"name": "Pork Al Pastor", "format": "taco", "notes": "salsa verde, grilled pineapple, onion, cilantro", "tags": ["pork", "fresh"], "spice": 2},
-        {"name": "Chicken Al Carbon", "format": "taco", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"], "spice": 2},
-        {"name": "Caramelized Cauliflower", "format": "taco", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond", "tags": ["vegetarian", "sweet", "creamy"], "spice": 2},
-        {"name": "Baja Style (crispy shrimp)", "format": "taco", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3},
-        {"name": "Baja Style (crispy mahi)", "format": "taco", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3},
-        {"name": "Carne Asada", "format": "taco", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef", "creamy"], "spice": 1}
+        {"name": "Pork Al Pastor", "notes": "salsa verde, grilled pineapple, onion, cilantro (corn tortilla)", "tags": ["pork", "fresh"], "spice": 2},
+        {"name": "Chicken Al Carbon", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"], "spice": 2},
+        {"name": "Caramelized Cauliflower", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond (corn tortilla)", "tags": ["vegetarian", "sweet", "creamy"], "spice": 2},
+        {"name": "Baja Style (crispy shrimp)", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3},
+        {"name": "Baja Style (crispy mahi)", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3},
+        {"name": "Carne Asada", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef", "creamy"], "spice": 1}
       ],
       "antojitos": [
-        {"name": "Chips & Salsa", "notes": "choose tomato ancho, serrano verde, or habanero kreeper", "tags": ["shareable", "vegan"]},
-        {"name": "O.G. Guacamole", "tags": ["vegetarian", "shareable", "fresh"]},
-        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija", "tags": ["shareable", "cheese"], "spice": 2},
-        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, pepitas", "tags": ["vegetarian", "sweet‑spicy"]},
+        {"name": "Chips & Salsa", "notes": "tomato ancho, serrano verde, or habanero \"kreeper\"", "tags": ["shareable", "vegan", "spicy"]},
+        {"name": "O.G. Guacamole", "notes": "avocado, onion, lime, crispy chips", "tags": ["vegetarian", "shareable", "fresh"]},
+        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija, crispy chips", "tags": ["shareable", "cheese"], "spice": 2},
+        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, ancho‑spiced pepitas", "tags": ["vegetarian", "sweet‑spicy"]},
         {"name": "Mexico City Ceviche", "notes": "mahi, pico, serrano, lime, avocado, red diablo, plantain", "tags": ["seafood", "fresh"], "spice": 2}
       ],
       "quesadillas": [
@@ -24,9 +25,9 @@
         {"name": "Steak Quesadilla", "tags": ["beef", "cheese"]}
       ],
       "soup_salad": [
-        {"name": "Chicken Tortilla Soup", "tags": ["soup"], "spice": 1},
-        {"name": "Baby Kale Caesar", "tags": ["salad"]},
-        {"name": "Ranchero Wedge", "tags": ["salad"], "spice": 1}
+        {"name": "Chicken Tortilla Soup", "notes": "pasilla chile, crema, avocado, onion", "tags": ["soup"], "spice": 1},
+        {"name": "Baby Kale Caesar", "notes": "Tijuana Style", "tags": ["salad"]},
+        {"name": "Ranchero Wedge", "notes": "pasilla ranch, fresno peppers, tortilla strips", "tags": ["salad"], "spice": 1}
       ],
       "enchiladas": [
         {"name": "Braised Chicken Enchiladas", "notes": "sweet corn, black bean, cheese, couscous, crema, scallion, red diablo", "tags": ["chicken", "creamy"], "spice": 2},
@@ -40,31 +41,31 @@
         {"name": "El Jefe Fajitas", "notes": "all three proteins", "tags": ["mix", "shareable", "sizzle"]}
       ],
       "sides": [
-        {"name": "Pickled Cucumber Salad", "tags": ["vegetarian", "fresh", "gluten‑friendly"]},
+        {"name": "Pickled Cucumber Salad", "notes": "shaved onion, rice vinegar", "tags": ["vegetarian", "fresh", "gluten‑friendly"]},
         {"name": "Crispy Potatoes", "notes": "sweet chili glaze, scallion, crema", "tags": ["vegetarian"]},
-        {"name": "Black Beans & Rice", "tags": ["vegetarian", "gluten‑friendly"]},
-        {"name": "Grilled Street Corn", "tags": ["vegetarian"]},
-        {"name": "Nada’s Mac N’ Cheese", "tags": ["vegetarian", "cheese"]},
-        {"name": "Jalapeño Cheddar Cornbread", "tags": ["vegetarian"]}
+        {"name": "Black Beans & Rice", "notes": "pico de gallo, cotija", "tags": ["vegetarian", "gluten‑friendly"]},
+        {"name": "Grilled Street Corn", "notes": "chili mayo, cotija, lime", "tags": ["vegetarian"]},
+        {"name": "Nada’s Mac N’ Cheese", "notes": "roasted poblano, garlic breadcrumb", "tags": ["vegetarian", "cheese", "creamy"]},
+        {"name": "Jalapeño Cheddar Cornbread", "notes": "whipped butter, sea salt, honey", "tags": ["vegetarian", "sweet"]}
       ]
     },
     "dinner": {
       "antojitos": [
-        {"name": "Chips & Salsa Trio", "tags": ["shareable", "vegan"]},
-        {"name": "O.G. Guacamole", "notes": "with tomatillo", "tags": ["vegetarian", "shareable"]},
-        {"name": "¡Queso!", "tags": ["shareable", "cheese"]},
-        {"name": "Crispy Brussels", "tags": ["vegetarian"]},
-        {"name": "Mexico City Ceviche", "tags": ["seafood", "fresh"]}
+        {"name": "Chips & Salsa Trio", "notes": "tomato ancho, serrano verde, habanero \"kreeper\"", "tags": ["shareable", "vegan", "spicy"]},
+        {"name": "O.G. Guacamole", "notes": "avocado, onion, lime, tomatillo, crispy chips", "tags": ["vegetarian", "shareable", "fresh"]},
+        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija, crispy chips", "tags": ["shareable", "cheese"]},
+        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, ancho‑spiced pepita", "tags": ["vegetarian", "sweet‑spicy"]},
+        {"name": "Mexico City Ceviche", "notes": "mahi, pico, serrano, lime, avocado, red diablo, plantain", "tags": ["seafood", "fresh"], "spice": 2}
       ],
       "quesadillas": [
-        {"name": "Cheese Quesadilla", "tags": ["vegetarian"]},
-        {"name": "Chicken Quesadilla", "tags": ["chicken"]},
-        {"name": "Steak Quesadilla", "tags": ["beef"]}
+        {"name": "Cheese Quesadilla", "tags": ["vegetarian", "cheese"]},
+        {"name": "Chicken Quesadilla", "tags": ["chicken", "cheese"]},
+        {"name": "Steak Quesadilla", "tags": ["beef", "cheese"]}
       ],
       "soup_salad": [
-        {"name": "Chicken Tortilla Soup", "tags": ["soup"]},
-        {"name": "Baby Kale Caesar", "tags": ["salad"]},
-        {"name": "Ranchero Wedge", "tags": ["salad"]}
+        {"name": "Chicken Tortilla Soup", "notes": "pasilla chile, crema, avocado, onion", "tags": ["soup"]},
+        {"name": "Baby Kale Caesar", "notes": "Tijuana Style", "tags": ["salad"]},
+        {"name": "Ranchero Wedge", "notes": "pasilla ranch, fresno peppers, tortilla strips", "tags": ["salad"], "spice": 1}
       ],
       "fajitas": [
         {"name": "Ancho‑Crusted Chicken Fajitas", "tags": ["chicken", "sizzle"]},
@@ -73,47 +74,47 @@
         {"name": "El Jefe Fajitas", "tags": ["mix", "shareable", "sizzle"]}
       ],
       "tacos": [
-        {"name": "Pork Al Pastor", "tags": ["pork"]},
-        {"name": "Chicken Al Carbon", "tags": ["chicken"]},
-        {"name": "Caramelized Cauliflower", "tags": ["vegetarian"]},
-        {"name": "Baja Style (crispy mahi)", "tags": ["seafood", "crispy"]},
-        {"name": "Baja Style (crispy shrimp)", "tags": ["seafood", "crispy"]},
-        {"name": "Carne Asada", "tags": ["beef"]}
+        {"name": "Pork Al Pastor", "notes": "salsa verde, grilled pineapple, onion, cilantro (corn tortilla)", "tags": ["pork"]},
+        {"name": "Chicken Al Carbon", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"]},
+        {"name": "Caramelized Cauliflower", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond (corn tortilla)", "tags": ["vegetarian", "creamy", "sweet"]},
+        {"name": "Baja Style (crispy mahi)", "notes": "cabbage, chipotle mayo, pico de gallo, pickled red onion", "tags": ["seafood", "crispy", "spicy"]},
+        {"name": "Baja Style (crispy shrimp)", "notes": "cabbage, chipotle mayo, pico de gallo, pickled red onion", "tags": ["seafood", "crispy", "spicy"]},
+        {"name": "Carne Asada", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef", "creamy"]}
       ],
       "enchiladas": [
-        {"name": "“World Famous” Braised Chicken Enchiladas", "tags": ["chicken", "creamy"]},
-        {"name": "Three Cheese Enchiladas", "tags": ["vegetarian", "cheese"]},
-        {"name": "Baja Seafood Enchiladas", "tags": ["seafood", "creamy"]}
+        {"name": "“World Famous” Braised Chicken Enchiladas", "notes": "sweet corn, black beans, cheese, couscous, crema, scallion, red diablo sauce", "tags": ["chicken", "creamy"]},
+        {"name": "Three Cheese Enchiladas", "notes": "ancho‑chili gravy", "tags": ["vegetarian", "cheese"]},
+        {"name": "Baja Seafood Enchiladas", "notes": "creamy krab, shrimp, cheese, cilantro", "tags": ["seafood", "creamy"]}
       ],
       "sides": [
-        {"name": "Pickled Cucumber Salad", "tags": ["vegetarian", "gluten‑friendly"]},
-        {"name": "Nada’s Mac N’ Cheese (jalapeño)", "tags": ["vegetarian", "cheese"]},
-        {"name": "Black Beans & Rice", "tags": ["vegetarian", "gluten‑friendly"]},
-        {"name": "Grilled Street Corn", "tags": ["vegetarian"]},
-        {"name": "Crispy Potatoes", "tags": ["vegetarian"]},
-        {"name": "Jalapeño Cheddar Cornbread", "tags": ["vegetarian"]}
+        {"name": "Pickled Cucumber Salad", "notes": "shaved onion, rice vinegar", "tags": ["vegetarian", "gluten‑friendly", "fresh"]},
+        {"name": "Nada’s Mac N’ Cheese (jalapeño)", "notes": "roasted poblano, jalapeño, garlic breadcrumb", "tags": ["vegetarian", "cheese", "creamy", "spicy"]},
+        {"name": "Black Beans & Rice", "notes": "pico de gallo, cotija", "tags": ["vegetarian", "gluten‑friendly"]},
+        {"name": "Grilled Street Corn", "notes": "chili mayo, cotija, lime", "tags": ["vegetarian"]},
+        {"name": "Crispy Potatoes", "notes": "sweet chili glaze, scallion, crema", "tags": ["vegetarian"]},
+        {"name": "Jalapeño Cheddar Cornbread", "notes": "whipped butter, sea salt, honey", "tags": ["vegetarian", "sweet"]}
       ],
       "desserts": [
-        {"name": "Churros", "tags": ["shareable", "dessert"]},
-        {"name": "Tres Leches", "tags": ["dessert", "creamy"]}
+        {"name": "Churros", "notes": "dulce de leche dipping sauce", "tags": ["shareable", "dessert", "sweet"]},
+        {"name": "Tres Leches", "notes": "chiffon cake, three milks, red berry compote, whipped cream, cinnamon almonds", "tags": ["dessert", "creamy", "sweet"]}
       ]
     },
     "brunch": {
       "entrees": [
-        {"name": "Huevos Rancheros", "tags": ["vegetarian"], "spice": 2},
-        {"name": "Steak + Eggs", "tags": ["beef"]},
-        {"name": "Eggs Goettadicto", "tags": ["pork", "brunch"]},
-        {"name": "Chorizo Burrito", "tags": ["pork", "spicy"]},
-        {"name": "Veggie Burrito", "tags": ["vegetarian"]},
-        {"name": "Avocado Toast", "tags": ["vegetarian", "fresh"]},
-        {"name": "Crème Brûlée French Toast", "tags": ["vegetarian", "sweet"]}
+        {"name": "Huevos Rancheros", "notes": "black beans, salsa verde, queso fresco, ancho salsa", "tags": ["vegetarian"], "spice": 2},
+        {"name": "Steak + Eggs", "notes": "grilled skirt steak, onion, bell pepper, crispy potatoes, ancho salsa", "tags": ["beef"]},
+        {"name": "Eggs Goettadicto", "notes": "English muffin, poached eggs, avocado, goetta, pico de gallo, sriracha hollandaise", "tags": ["pork", "brunch", "creamy"]},
+        {"name": "Chorizo Burrito", "notes": "three eggs, Cincinnati‑style chorizo, cheese", "tags": ["pork", "spicy"]},
+        {"name": "Veggie Burrito", "notes": "three eggs, onion, bell pepper, roasted mushroom, cheese", "tags": ["vegetarian"]},
+        {"name": "Avocado Toast", "notes": "French loaf, cherry heirloom tomato, Persian cucumber, breakfast radish, pepitas, microgreens", "tags": ["vegetarian", "fresh"]},
+        {"name": "Crème Brûlée French Toast", "notes": "whipped cream, powdered sugar, maple syrup", "tags": ["vegetarian", "sweet"]}
       ]
     },
     "kids": {
       "items": [
         {"name": "Cheese Quesadilla", "tags": ["vegetarian"]},
         {"name": "Chicken Tenders", "tags": ["chicken"]},
-        {"name": "Creamy Mac ’n Cheese", "tags": ["vegetarian"]},
+        {"name": "Creamy Mac ’n Cheese", "tags": ["vegetarian", "cheese", "creamy"]},
         {"name": "Fried Plantains", "tags": ["vegetarian", "sweet"]},
         {"name": "Buttered Corn", "tags": ["vegetarian"]},
         {"name": "Curly Fries", "tags": ["vegetarian"]},
@@ -125,37 +126,45 @@
     },
     "beverages": {
       "margaritas": [
-        {"name": "Nadarita", "price": 13},
-        {"name": "Spicy Margarita", "price": 14},
-        {"name": "Mezcal Margarita", "price": 15},
-        {"name": "Chile‑Mango", "price": 14},
-        {"name": "Pink Grapefruit", "price": 15},
-        {"name": "Suprema", "price": 17}
+        {"name": "Nadarita"},
+        {"name": "Spicy Margarita"},
+        {"name": "Mezcal Margarita"},
+        {"name": "Chile‑Mango"},
+        {"name": "Pink Grapefruit"},
+        {"name": "Suprema"}
       ],
       "cocktails": [
-        {"name": "Blonde Gimlet", "price": 14},
-        {"name": "Pineapple Mojito", "price": 13},
-        {"name": "Blueberry Limonada", "price": 13},
-        {"name": "Bonfire", "price": 14}
+        {"name": "Blonde Gimlet"},
+        {"name": "Pineapple Mojito"},
+        {"name": "Blueberry Limonada"},
+        {"name": "Bonfire"}
       ],
       "sangria": [
-        {"name": "Sangria Rojo", "price": 10},
-        {"name": "Sangria Blanco", "price": 10}
+        {"name": "Sangria Rojo"},
+        {"name": "Sangria Blanco"}
+      ],
+      "wine": [
+        {"name": "Cava (Sparkling)"},
+        {"name": "Sauvignon Blanc"},
+        {"name": "Torrontés"},
+        {"name": "Garnacha GX Rosé"},
+        {"name": "Pinot Noir"},
+        {"name": "Tempranillo"}
       ],
       "beer": [
-        {"name": "Rhinegeist Juicy Truth", "price": 8},
-        {"name": "Miller Lite", "price": 6},
-        {"name": "Corona", "price": 6.5},
-        {"name": "Pacifico Clara", "price": 6.5},
-        {"name": "Modelo Especial", "price": 6.5},
-        {"name": "Negra Modelo", "price": 6.5}
+        {"name": "Rhinegeist Juicy Truth"},
+        {"name": "Miller Lite"},
+        {"name": "Corona"},
+        {"name": "Pacifico Clara"},
+        {"name": "Modelo Especial"},
+        {"name": "Negra Modelo"}
       ],
       "na": [
-        {"name": "Mexican Soda (Coke/Sprite)", "price": 5},
-        {"name": "Topo Chico (Original)", "price": 5},
-        {"name": "Jarritos (grapefruit/mandarin/pineapple)", "price": 5},
-        {"name": "Pink Grapefruit Soda", "price": 7},
-        {"name": "Nada Lemonade", "price": 7}
+        {"name": "Mexican Soda (Coke/Sprite)"},
+        {"name": "Topo Chico (Original)"},
+        {"name": "Jarritos (grapefruit/mandarin/pineapple)"},
+        {"name": "Pink Grapefruit Soda"},
+        {"name": "Nada Lemonade"}
       ]
     }
   },
@@ -165,6 +174,6 @@
       "three_tacos": 1.3,
       "fajitas_shared_for_two": 2
     },
-    "assumptions": "Prices for food items are not included; beverages contain prices."
+    "assumptions": "Beverage prices omitted; food prices not included; beverages are provided as selectable names."
   }
 }
