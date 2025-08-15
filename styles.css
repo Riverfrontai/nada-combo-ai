@@ -119,3 +119,10 @@ h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
 
 /* Confetti container */
 #confetti{ position: fixed; inset:0; pointer-events:none; z-index:70; }
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+  .item-thumb{ width:36px; height:36px; }
+  .rec-img{ aspect-ratio: 4/3; }
+}
+
