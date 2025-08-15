@@ -20,10 +20,9 @@ function sanitizeInput(body){
   const diet = Array.isArray(body.diet)? body.diet.slice(0,5): [];
   const spice = ['mild','medium','hot'].includes(body.spice)? body.spice:'medium';
   const alcohol = ['any','na','cocktail','beer','wine'].includes(body.alcohol)? body.alcohol:'any';
-  const dayOfWeek = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].includes(body.dayOfWeek) ? body.dayOfWeek : 'Fri';
-  const timeSlot = ['lunch','happy_hour','dinner','late'].includes(body.timeSlot) ? body.timeSlot : 'dinner';
+  const portionPref = ['light','filling'].includes(body.portionPref) ? body.portionPref : 'light';
   const _variant = Number.isFinite(Number(body._variant)) ? Math.max(0, Math.min(99, Number(body._variant))) : 0;
-  return { meal, dayOfWeek, timeSlot, partySize, budget, diet, spice, alcohol, _variant };
+  return { meal, partySize, budget, diet, spice, alcohol, portionPref, _variant };
 }
 
 // Compose a scoped view that pulls from the selected meal with sensible fallbacks
@@ -82,9 +81,7 @@ function pick(arr){ return Array.isArray(arr) && arr.length ? arr[Math.floor(Mat
 function buildRuleCombos(menu, prefs){
   const combos = [];
   const party = prefs.partySize || 2;
-  const alcohol = prefs.alcohol || 'any';
-  const slot = prefs.timeSlot || 'dinner';
-  const isWeekend = ['Sat','Sun'].includes(prefs.dayOfWeek || 'Fri');
+  const isWeekend = false; // UI no longer collects day; neutralize
 
   // Helper getters
   const antojitos = menu.antojitos || [];
@@ -96,13 +93,10 @@ function buildRuleCombos(menu, prefs){
   const entrees   = menu.entrees || [];
   const desserts  = menu.desserts || [];
 
-  // Tag preferences by time slot
-  const prefTags = {
-    lunch: { prefer: ['fresh','seafood'], avoid: ['creamy'] },
-    happy_hour: { prefer: ['shareable'], avoid: [] },
-    dinner: { prefer: ['creamy','shareable'], avoid: [] },
-    late: { prefer: ['crispy','quick'], avoid: ['heavy'] }
-  }[slot] || { prefer: [], avoid: [] };
+  // Preference tags based on portionPref
+  const prefTags = prefs.portionPref === 'light'
+    ? { prefer: ['fresh','seafood'], avoid: ['creamy','heavy'] }
+    : { prefer: ['shareable','creamy','cheese'], avoid: [] };
 
   const pickBy = (arr) => {
     if (!Array.isArray(arr) || arr.length === 0) return null;
@@ -114,9 +108,9 @@ function buildRuleCombos(menu, prefs){
   if (entrees.length) {
     const a = {
       title: 'Brunch Favorite',
-      tags: ['balanced','rule-based', slot, isWeekend?'weekend':'weekday'],
+      tags: ['balanced','rule-based', prefs.portionPref],
       items: [],
-      rationale: `Balanced for ${prefs.dayOfWeek} ${slot.replace('_',' ')}.`
+      rationale: `Balanced for ${prefs.portionPref} appetite.`
     };
     const e1 = pickBy(entrees); if (e1) a.items.push({ category: 'Entree', name: e1.name });
     const s1 = pickBy(sides);   if (s1) a.items.push({ category: 'Side', name: s1.name });
@@ -125,9 +119,9 @@ function buildRuleCombos(menu, prefs){
 
     const b = {
       title: 'Light & Fresh Brunch',
-      tags: ['fresh','rule-based', slot, isWeekend?'weekend':'weekday'],
+      tags: ['fresh','rule-based', prefs.portionPref],
       items: [],
-      rationale: `Leaning fresh and easy for ${slot.replace('_',' ')}.`
+      rationale: `Leaning fresh for ${prefs.portionPref}.`
     };
     const e2 = pickBy(entrees); if (e2) b.items.push({ category: 'Entree', name: e2.name });
     if (desserts.length) { const d = pickBy(desserts); if (d) b.items.push({ category: 'Dessert', name: d.name }); }
@@ -137,12 +131,11 @@ function buildRuleCombos(menu, prefs){
   }
 
   // Dinner/Lunch templates
-  // Combo A: Starter + Taco Pair + Side + Drink
   const a = {
-    title: slot === 'lunch' ? 'Midday First‑Timer' : 'First‑Timer Flight',
-    tags: ['balanced','rule-based', slot, isWeekend?'weekend':'weekday'],
+    title: prefs.portionPref === 'light' ? 'First‑Timer (Light)' : 'First‑Timer (Filling)',
+    tags: ['balanced','rule-based', prefs.portionPref],
     items: [],
-    rationale: `Optimized for ${prefs.dayOfWeek} ${slot.replace('_',' ')}—balanced textures and flavors.`
+    rationale: `Optimized variety for a ${prefs.portionPref} meal.`
   };
   const st = pickBy(antojitos); if (st) a.items.push({ category: 'Antojitos', name: st.name });
   const tt = pickBy(tacos);     if (tt) a.items.push({ category: 'Tacos', name: tt.name, note: 'pair' });
@@ -150,36 +143,33 @@ function buildRuleCombos(menu, prefs){
   a.items.push({ category: 'Drink', name: chooseDrink(prefs, menu) });
   if (a.items.length >= 2) combos.push(a);
 
-  // Combo B: Soup/Salad + Tacos + Side
   const b = {
-    title: slot === 'lunch' ? 'Light & Fresh Lunch' : 'Light & Fresh',
-    tags: ['fresh','rule-based', slot, isWeekend?'weekend':'weekday'],
+    title: prefs.portionPref === 'light' ? 'Light & Fresh' : 'Share & Sizzle',
+    tags: ['fresh','rule-based', prefs.portionPref],
     items: [],
-    rationale: `Lighter set for ${slot.replace('_',' ')}, leaning fresh.`
+    rationale: prefs.portionPref === 'light' ? 'Lighter set, leaning fresh.' : 'Shareables and sizzling main.'
   };
   const ssp = pickBy(soups); if (ssp) b.items.push({ category: 'Soup/Salad', name: ssp.name });
   const tt2 = pickBy(tacos); if (tt2) b.items.push({ category: 'Tacos', name: tt2.name, note: 'pair' });
   const ss2 = pickBy(sides); if (ss2) b.items.push({ category: 'Side', name: ss2.name });
   if (b.items.length >= 2) combos.push(b);
 
-  // Combo C (for 2+): Shareable + Fajitas
-  if (party >= 2 && (fajitas.length || antojitos.length)) {
+  if (party >= 2 && (fajitas.length || antojitos.length) && prefs.portionPref === 'filling') {
     const c = {
-      title: isWeekend ? 'Weekend Share & Sizzle' : 'Share & Sizzle',
-      tags: ['shareable','rule-based', slot, isWeekend?'weekend':'weekday'],
+      title: 'Share & Sizzle',
+      tags: ['shareable','rule-based', prefs.portionPref],
       items: [],
-      rationale: `Great for ${isWeekend?'weekends':'evenings'}—shareables and sizzling main.`
+      rationale: 'Great for heartier appetites—shareable and sizzling.'
     };
     const st2 = pickBy(antojitos); if (st2) c.items.push({ category: 'Antojitos', name: st2.name });
     const fj = pickBy(fajitas); if (fj) c.items.push({ category: 'Fajitas', name: fj.name });
     if (c.items.length >= 2) combos.push(c);
   }
 
-  // Optional dessert variant if available
-  if (Array.isArray(desserts) && desserts.length) {
+  if (Array.isArray(desserts) && desserts.length && prefs.portionPref === 'filling') {
     const d = {
       title: 'Sweet Finish',
-      tags: ['dessert','rule-based', slot],
+      tags: ['dessert','rule-based', prefs.portionPref],
       items: [],
       rationale: 'A sweet ending to balance the set.'
     };
@@ -191,7 +181,7 @@ function buildRuleCombos(menu, prefs){
 }
 
 function buildPrompt(menu, prefs){
-  return `You are a restaurant combo planner for Nada Cincinnati. You MUST ONLY use items from the provided JSON menu. Create 2-3 combos tailored to the preferences. Keep portions reasonable for the party size. Prefer variety of textures/flavors. Respect dietary flags and alcohol preference. Return STRICT JSON only.\n\nSchema:\n{\n  "recommendations": [\n    {\n      "title": string,\n      "tags": string[],\n      "items": [ { "category": string, "name": string, "note"?: string } ],\n      "estimatePerPerson"?: string,\n      "estimateTotal"?: string,\n      "rationale": string\n    }\n  ]\n}\n\nPreferences: ${JSON.stringify(prefs)}\nMenu: ${JSON.stringify(menu)}\n`;
+  return `You are a restaurant combo planner for Nada Cincinnati. You MUST ONLY use items from the provided JSON menu. Create 2-3 combos tailored to the preferences. Keep portions reasonable for the party size and honor portionPref (light vs filling). Prefer variety of textures/flavors. Respect dietary flags and alcohol preference. Return STRICT JSON only.\n\nSchema:\n{\n  "recommendations": [\n    {\n      "title": string,\n      "tags": string[],\n      "items": [ { "category": string, "name": string, "note"?: string } ],\n      "estimatePerPerson"?: string,\n      "estimateTotal"?: string,\n      "rationale": string\n    }\n  ]\n}\n\nPreferences: ${JSON.stringify(prefs)}\nMenu: ${JSON.stringify(menu)}\n`;
 }
 
 async function callOpenAI(prompt){
@@ -264,20 +254,17 @@ function itemsByCategory(menu, alcohol){
     entrees: menu.entrees||[],
     drink: []
   };
-  // keep a reference to beverages for chooseDrink
   map._beverages = menu._beverages || { margaritas:[], cocktails:[], sangria:[], beer:[], na:[] };
   return map;
 }
 
 function chooseDrink(prefs, scoped){
-  // Select from real beverage lists when available
   const b = (scoped && scoped._beverages) ? scoped._beverages : { margaritas:[], cocktails:[], sangria:[], beer:[], na:[] };
   const v = prefs._variant || 0;
   if (prefs.alcohol === 'na') {
     const pool = b.na.length ? b.na : [{name:'Nada Lemonade'},{name:'Pink Grapefruit Soda'},{name:'Topo Chico'}];
     return pool[(v) % pool.length].name || pool[(v) % pool.length];
   }
-  const slot = prefs.timeSlot;
   const beer = b.beer.map(x=>x.name);
   const margs = b.margaritas.map(x=>x.name);
   const cocktails = b.cocktails.map(x=>x.name);
@@ -286,9 +273,7 @@ function chooseDrink(prefs, scoped){
   if (prefs.alcohol === 'beer') pool = beer.length? beer : ['Corona','Modelo Especial'];
   else if (prefs.alcohol === 'cocktail') pool = cocktails.length? cocktails : ['Mezcal Margarita','Bonfire'];
   else if (prefs.alcohol === 'wine') pool = sangria.length? sangria : ['Sangria Blanco','Sangria Rojo'];
-  else pool = (slot==='happy_hour'? (margs.length? margs : ['Nadarita','Sangria Rojo','Rhinegeist Juicy Truth'])
-                    : slot==='late'? (beer.length? beer : ['Corona','Modelo Especial'])
-                    : (margs.length? margs : ['Nadarita','Mezcal Margarita','Sangria Blanco']));
+  else pool = (margs.length? margs : ['Nadarita','Mezcal Margarita','Sangria Blanco']);
   return pool[(v) % pool.length];
 }
 
@@ -305,15 +290,12 @@ function spiceScore(avg, pref){
 }
 
 function contextBoost(state, prefs){
-  const slot = prefs.timeSlot;
+  // Portion preference context: encourage fresh/seafood for light; shareable/cheese for filling
   let boost = 0;
   const tags = state.tags;
   const has = t=>tags.includes(t);
-  if (slot==='lunch') { if (has('fresh')) boost+=0.3; if (has('seafood')) boost+=0.2; if (has('creamy')) boost-=0.1; }
-  if (slot==='happy_hour') { if (has('shareable')) boost+=0.4; }
-  if (slot==='dinner') { if (has('creamy')) boost+=0.2; if (has('shareable')) boost+=0.2; }
-  if (slot==='late') { if (has('crispy')) boost+=0.3; }
-  if (['Sat','Sun'].includes(prefs.dayOfWeek)) { if (has('shareable')) boost+=0.2; }
+  if (prefs.portionPref === 'light') { if (has('fresh')) boost+=0.3; if (has('seafood')) boost+=0.2; if (has('creamy')) boost-=0.15; }
+  if (prefs.portionPref === 'filling') { if (has('shareable')) boost+=0.3; if (has('cheese')) boost+=0.2; }
   return boost;
 }
 
@@ -322,8 +304,9 @@ function scoreState(state, prefs){
   const s = spiceScore(state.spiceAvg, prefs.spice);
   const portionFit = (()=>{
     const per = state.portions / Math.max(1, prefs.partySize);
-    const diff = Math.abs(per-1);
-    return Math.max(0, 1 - diff); // perfect at 1.0
+    const target = prefs.portionPref==='light'? 0.8 : (prefs.portionPref==='filling'? 1.3 : 1.0);
+    const diff = Math.abs(per- target);
+    return Math.max(0, 1 - diff); // perfect at target
   })();
   const budgetFit = (()=>{
     if (!prefs.budget) return 0.8; // neutral if no budget
@@ -343,7 +326,7 @@ function feasiblePartial(state, prefs){
 
 function finalFeasible(state, prefs){
   const per = state.portions / Math.max(1, prefs.partySize);
-  if (per < 0.7 || per > 1.5) return false;
+  if (per < 0.6 || per > 1.7) return false; // widen a bit for filling
   if (prefs.budget){
     const target = prefs.budget * Math.max(1, prefs.partySize);
     if (state.price > target*1.5) return false;
@@ -431,11 +414,11 @@ function generateDeterministic(menu, prefs){
   const diversified = diversify(topK(candidates, 30), 3);
   return diversified.map(s=>({
     title: 'Chef-picked Combo',
-    tags: ['generated', prefs.timeSlot, ['Sat','Sun'].includes(prefs.dayOfWeek)?'weekend':'weekday'],
+    tags: ['generated', prefs.portionPref],
     items: s.picks.map(p=>({category: prettyCat(p.category), name: p.name})),
     estimatePerPerson: prefs.partySize? `$${Math.round((s.price||0)/prefs.partySize)}` : '—',
     estimateTotal: `$${Math.round(s.price||0)}`,
-    rationale: `Balanced variety for ${prefs.dayOfWeek} ${prefs.timeSlot.replace('_',' ')}.`
+    rationale: `Balanced variety tailored for a ${prefs.portionPref} meal.`
   }));
 }
 
@@ -520,7 +503,6 @@ exports.handler = async (event) => {
       const ai = await callOpenAI(prompt);
       result = ai && ai.recommendations ? ai : { recommendations: [] };
       if (!Array.isArray(result.recommendations) || result.recommendations.length === 0) {
-        // Fallback: deterministic then simple rule-based if still empty
         const det = generateDeterministic(scoped, prefs);
         result = { recommendations: det.length ? det : buildRuleCombos(scoped, prefs) };
       }

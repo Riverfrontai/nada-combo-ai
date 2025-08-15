@@ -147,8 +147,7 @@ form.addEventListener('submit', (e)=>{
   const fd = new FormData(form);
   const payload = {
     meal: fd.get('meal'),
-    dayOfWeek: fd.get('dayOfWeek'),
-    timeSlot: fd.get('timeSlot'),
+    portionPref: fd.get('portionPref'),
     partySize: Number(fd.get('partySize'))||1,
     budget: fd.get('budget')? Number(fd.get('budget')): null,
     diet: fd.getAll('diet'),
