@@ -15,8 +15,8 @@ function loadMenu(){
 
 function sanitizeInput(body){
   const meal = ['lunch','dinner','brunch'].includes(body.meal)? body.meal : 'dinner';
-  const partySize = Math.min(12, Math.max(1, Number(body.partySize)||1));
-  const budget = body.budget!=null && !isNaN(Number(body.budget))? Number(body.budget): null;
+  const partySize = Math.min(10, Math.max(1, Number(body.partySize)||1));
+  const budget = null; // UI removed for now
   const diet = Array.isArray(body.diet)? body.diet.slice(0,5): [];
   const spice = ['mild','medium','hot'].includes(body.spice)? body.spice:'medium';
   const alcohol = ['any','na','cocktail','beer','wine'].includes(body.alcohol)? body.alcohol:'any';
@@ -81,7 +81,6 @@ function pick(arr){ return Array.isArray(arr) && arr.length ? arr[Math.floor(Mat
 function buildRuleCombos(menu, prefs){
   const combos = [];
   const party = prefs.partySize || 2;
-  const isWeekend = false; // UI no longer collects day; neutralize
 
   // Helper getters
   const antojitos = menu.antojitos || [];
@@ -107,7 +106,7 @@ function buildRuleCombos(menu, prefs){
   // Brunch-first templates
   if (entrees.length) {
     const a = {
-      title: 'Brunch Favorite',
+      title: 'AI Combo — Brunch Favorite',
       tags: ['balanced','rule-based', prefs.portionPref],
       items: [],
       rationale: `Balanced for ${prefs.portionPref} appetite.`
@@ -118,7 +117,7 @@ function buildRuleCombos(menu, prefs){
     combos.push(a);
 
     const b = {
-      title: 'Light & Fresh Brunch',
+      title: 'AI Combo — Light & Fresh Brunch',
       tags: ['fresh','rule-based', prefs.portionPref],
       items: [],
       rationale: `Leaning fresh for ${prefs.portionPref}.`
@@ -132,7 +131,7 @@ function buildRuleCombos(menu, prefs){
 
   // Dinner/Lunch templates
   const a = {
-    title: prefs.portionPref === 'light' ? 'First‑Timer (Light)' : 'First‑Timer (Filling)',
+    title: 'AI Combo — First‑Timer',
     tags: ['balanced','rule-based', prefs.portionPref],
     items: [],
     rationale: `Optimized variety for a ${prefs.portionPref} meal.`
@@ -144,7 +143,7 @@ function buildRuleCombos(menu, prefs){
   if (a.items.length >= 2) combos.push(a);
 
   const b = {
-    title: prefs.portionPref === 'light' ? 'Light & Fresh' : 'Share & Sizzle',
+    title: prefs.portionPref === 'light' ? 'AI Combo — Light & Fresh' : 'AI Combo — Share & Sizzle',
     tags: ['fresh','rule-based', prefs.portionPref],
     items: [],
     rationale: prefs.portionPref === 'light' ? 'Lighter set, leaning fresh.' : 'Shareables and sizzling main.'
@@ -156,7 +155,7 @@ function buildRuleCombos(menu, prefs){
 
   if (party >= 2 && (fajitas.length || antojitos.length) && prefs.portionPref === 'filling') {
     const c = {
-      title: 'Share & Sizzle',
+      title: 'AI Combo — Share & Sizzle',
       tags: ['shareable','rule-based', prefs.portionPref],
       items: [],
       rationale: 'Great for heartier appetites—shareable and sizzling.'
@@ -168,7 +167,7 @@ function buildRuleCombos(menu, prefs){
 
   if (Array.isArray(desserts) && desserts.length && prefs.portionPref === 'filling') {
     const d = {
-      title: 'Sweet Finish',
+      title: 'AI Combo — Sweet Finish',
       tags: ['dessert','rule-based', prefs.portionPref],
       items: [],
       rationale: 'A sweet ending to balance the set.'
@@ -262,19 +261,19 @@ function chooseDrink(prefs, scoped){
   const b = (scoped && scoped._beverages) ? scoped._beverages : { margaritas:[], cocktails:[], sangria:[], beer:[], na:[] };
   const v = prefs._variant || 0;
   if (prefs.alcohol === 'na') {
-    const pool = b.na.length ? b.na : [{name:'Nada Lemonade'},{name:'Pink Grapefruit Soda'},{name:'Topo Chico'}];
-    return pool[(v) % pool.length].name || pool[(v) % pool.length];
+    const pool = b.na.length ? b.na.map(x=>x.name||x) : ['Nada Lemonade','Pink Grapefruit Soda','Topo Chico'];
+    return pool[(v) % pool.length];
   }
   const beer = b.beer.map(x=>x.name);
   const margs = b.margaritas.map(x=>x.name);
   const cocktails = b.cocktails.map(x=>x.name);
   const sangria = b.sangria.map(x=>x.name);
-  let pool = [];
-  if (prefs.alcohol === 'beer') pool = beer.length? beer : ['Corona','Modelo Especial'];
-  else if (prefs.alcohol === 'cocktail') pool = cocktails.length? cocktails : ['Mezcal Margarita','Bonfire'];
-  else if (prefs.alcohol === 'wine') pool = sangria.length? sangria : ['Sangria Blanco','Sangria Rojo'];
-  else pool = (margs.length? margs : ['Nadarita','Mezcal Margarita','Sangria Blanco']);
-  return pool[(v) % pool.length];
+  if (prefs.alcohol === 'beer') return beer[(v) % beer.length] || 'Corona';
+  if (prefs.alcohol === 'cocktail') return cocktails[(v) % cocktails.length] || 'Bonfire';
+  if (prefs.alcohol === 'wine') return sangria[(v) % sangria.length] || 'Sangria Blanco';
+  // any: prefer margaritas, else fallbacks
+  const anyPool = (margs.length? margs : ['Nadarita','Mezcal Margarita','Sangria Blanco']).concat(sangria).concat(beer);
+  return anyPool[(v) % anyPool.length];
 }
 
 function varietyScore(tags){
@@ -290,7 +289,6 @@ function spiceScore(avg, pref){
 }
 
 function contextBoost(state, prefs){
-  // Portion preference context: encourage fresh/seafood for light; shareable/cheese for filling
   let boost = 0;
   const tags = state.tags;
   const has = t=>tags.includes(t);
@@ -306,31 +304,21 @@ function scoreState(state, prefs){
     const per = state.portions / Math.max(1, prefs.partySize);
     const target = prefs.portionPref==='light'? 0.8 : (prefs.portionPref==='filling'? 1.3 : 1.0);
     const diff = Math.abs(per- target);
-    return Math.max(0, 1 - diff); // perfect at target
+    return Math.max(0, 1 - diff);
   })();
-  const budgetFit = (()=>{
-    if (!prefs.budget) return 0.8; // neutral if no budget
-    const target = prefs.budget * Math.max(1, prefs.partySize);
-    const diff = Math.abs((state.price||0) - target);
-    const tol = Math.max(10, target*0.2);
-    return Math.max(0, 1 - diff/tol);
-  })();
+  const budgetFit = 0.8; // neutral (budget disabled)
   const ctx = contextBoost(state, prefs);
   return 2.0*v + 1.5*s + 2.0*portionFit + 2.0*budgetFit + ctx - 0.1*state.picks.length;
 }
 
 function feasiblePartial(state, prefs){
-  if (state.portions > prefs.partySize*1.6) return false;
+  if (state.portions > prefs.partySize*1.8) return false;
   return true;
 }
 
 function finalFeasible(state, prefs){
   const per = state.portions / Math.max(1, prefs.partySize);
-  if (per < 0.6 || per > 1.7) return false; // widen a bit for filling
-  if (prefs.budget){
-    const target = prefs.budget * Math.max(1, prefs.partySize);
-    if (state.price > target*1.5) return false;
-  }
+  if (per < 0.6 || per > 1.8) return false;
   return true;
 }
 
@@ -391,17 +379,15 @@ function generateDeterministic(menu, prefs){
     for (let step=0; step<tpl.length; step++){
       const cat = tpl[step];
       const base = cats[cat]||[];
-      const opts = cat==='drink' ? base : rotate(base, variant + step + tIndex);
       const next = [];
+      const opts = (cat==='drink') ? (function(){
+        // Encode chosen drink as a synthetic item to track variety
+        const name = chooseDrink(prefs, menu);
+        return [{ name, tags: [] }];
+      })() : rotate(base, variant + step + tIndex);
+
       for (const s of beam){
-        if ((opts||[]).length===0){
-          if (cat==='drink'){
-            const pseudo = { name: chooseDrink(prefs, menu), tags: [] };
-            const s2 = addPick(s, cat, pseudo, prefs);
-            if (feasiblePartial(s2, prefs)) next.push(s2);
-          }
-          continue;
-        }
+        if ((opts||[]).length===0){ continue; }
         for (const it of opts){
           const s2 = addPick(s, cat, it, prefs);
           if (feasiblePartial(s2, prefs)) next.push(s2);
@@ -413,7 +399,7 @@ function generateDeterministic(menu, prefs){
   }
   const diversified = diversify(topK(candidates, 30), 3);
   return diversified.map(s=>({
-    title: 'Chef-picked Combo',
+    title: 'AI Combo',
     tags: ['generated', prefs.portionPref],
     items: s.picks.map(p=>({category: prettyCat(p.category), name: p.name})),
     estimatePerPerson: prefs.partySize? `$${Math.round((s.price||0)/prefs.partySize)}` : '—',

@@ -47,6 +47,28 @@ function renderSkeleton(){
   }
 }
 
+// Fallback data-URI icons by category
+const ICONS = {
+  'Tacos': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%23f59e0b"><path d="M12 3a9 9 0 0 0-9 9h2a7 7 0 0 1 7-7V3z"/><path d="M21 12a9 9 0 0 0-9-9v2a7 7 0 0 1 7 7h2z"/><path d="M4 13h16v3a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-3z"/></svg>',
+  'Antojitos': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%230ea5e9"><path d="M12 3C7 3 3 7 3 12h18c0-5-4-9-9-9z"/><rect x="5" y="12" width="14" height="7" rx="2" fill="%23038bce"/></svg>',
+  'Soup/Salad': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%2334d399"><path d="M3 10h18v2a7 7 0 0 1-7 7H10a7 7 0 0 1-7-7v-2z"/><path d="M7 7h10" stroke="%230f766e" stroke-width="2"/></svg>',
+  'Side': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%2394a3b8"><circle cx="12" cy="12" r="8"/></svg>',
+  'Fajitas': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%23ef4444"><rect x="4" y="9" width="16" height="8" rx="3"/><path d="M6 9V7m12 2V7" stroke="%23b91c1c" stroke-width="2"/></svg>',
+  'Quesadillas': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%23f97316"><path d="M4 14a8 8 0 0 1 16 0H4z"/></svg>',
+  'Enchiladas': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%238b5cf6"><rect x="5" y="8" width="14" height="8" rx="2"/></svg>',
+  'Dessert': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%23e879f9"><path d="M12 3l3 6H9l3-6z"/><rect x="6" y="9" width="12" height="6" rx="3"/></svg>',
+  'Entree': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%230ea5e9"><rect x="4" y="8" width="16" height="8" rx="2"/></svg>',
+  'Drink': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="%2300bcd4"><path d="M5 4h14l-2 5H7L5 4z"/><path d="M8 9h8v7a4 4 0 0 1-4 4 4 4 0 0 1-4-4V9z"/></svg>'
+};
+
+function thumbFor(item){
+  const name = item.name;
+  if (imageMap && imageMap[name]) return imageMap[name];
+  const cat = (item.category||'').toString();
+  if (ICONS[cat]) return ICONS[cat];
+  return ICONS['Side'];
+}
+
 function findHero(rec){
   const items = rec.items || [];
   for(const it of items){
@@ -54,6 +76,8 @@ function findHero(rec){
     const p = imageMap[it.name];
     if (p) return p;
   }
+  // fallback: first item icon
+  if (items[0]) return thumbFor(items[0]);
   return null;
 }
 
@@ -68,25 +92,29 @@ function renderResults(payload, data){
     const hero = findHero(rec);
     if (hero) {
       const img = el('img','rec-img');
-      img.src = hero; img.alt = rec.title || 'Combo image';
+      img.src = hero; img.alt = rec.title || 'AI Combo';
       card.appendChild(img);
     }
 
-    const title = el('h4'); title.textContent = rec.title || 'Chef-picked Combo'; card.appendChild(title);
+    const title = el('h4'); title.textContent = rec.title || 'AI Combo'; card.appendChild(title);
     if(rec.tags){
       const tags = el('div');
-      const engine = rec.tags.includes('generated') ? 'AI' : (rec.tags.includes('rule-based') ? 'Rule' : 'Chef');
+      const engine = rec.tags.includes('generated') ? 'AI' : (rec.tags.includes('rule-based') ? 'Rule' : 'AI');
       const eng = el('span','tag ' + (engine==='AI'?'ai':engine==='Rule'?'rule':'generated')); eng.textContent = engine; tags.appendChild(eng);
       rec.tags.forEach(t=>{ const b=el('span','tag'); b.textContent = t; tags.appendChild(b); });
       card.appendChild(tags);
     }
-    const ul = el('ul');
+    const list = el('div');
     (rec.items||[]).forEach(item=>{
-      const li = el('li');
-      li.textContent = `${item.category}: ${item.name}` + (item.note?` — ${item.note}`:'');
-      ul.appendChild(li);
+      const row = el('div','item-row');
+      const img = el('img','item-thumb'); img.src = thumbFor(item); img.alt = item.category;
+      const name = el('div','item-name'); name.textContent = `${item.category}: ${item.name}`;
+      const note = item.note ? el('div','item-note') : null; if (note){ note.textContent = item.note; }
+      row.appendChild(img); row.appendChild(name); if(note) row.appendChild(note);
+      list.appendChild(row);
     });
-    card.appendChild(ul);
+    card.appendChild(list);
+
     const p = el('div','small');
     p.textContent = `Est. per person: ${rec.estimatePerPerson ?? '—'} | Est. total: ${rec.estimateTotal ?? '—'}`;
     card.appendChild(p);
@@ -149,7 +177,6 @@ form.addEventListener('submit', (e)=>{
     meal: fd.get('meal'),
     portionPref: fd.get('portionPref'),
     partySize: Number(fd.get('partySize'))||1,
-    budget: fd.get('budget')? Number(fd.get('budget')): null,
     diet: fd.getAll('diet'),
     spice: fd.get('spice'),
     alcohol: fd.get('alcohol'),

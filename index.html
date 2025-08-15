@@ -30,7 +30,7 @@
 
   <div class="combo-page">
     <h1>Custom Combo Experience — Nada Cincinnati</h1>
-    <p class="muted">Tell us your vibe. We’ll craft 2–3 combos using the real menu, balanced for flavor, diet, and budget.</p>
+    <p class="muted">Tell us your vibe. We’ll craft 2–3 combos using the real menu, balanced for flavor and diet. Pictures included.</p>
 
     <div class="combo-grid">
       <div class="combo-card">
@@ -50,10 +50,18 @@
           </select>
 
           <label style="margin-top:10px;">Party Size</label>
-          <input type="number" name="partySize" min="1" max="12" value="2" />
-
-          <label style="margin-top:10px;">Budget per Person (USD)</label>
-          <input type="number" name="budget" min="10" max="100" step="1" placeholder="Optional"/>
+          <select name="partySize">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
 
           <label style="margin-top:10px;">Dietary</label>
           <select name="diet" multiple size="3">

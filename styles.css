@@ -82,6 +82,12 @@ h1,h2,h3{margin:0 0 12px;font-family:var(--font-heading)}
 /* Result hero image */
 .rec-img{ width:100%; border-radius:12px; aspect-ratio: 16/9; object-fit: cover; margin-bottom:10px; box-shadow: 0 6px 14px rgba(0,0,0,.08); }
 
+/* Item thumbnail row */
+.item-row{ display:flex; align-items:center; gap:10px; margin:6px 0; }
+.item-thumb{ width:40px; height:40px; border-radius:8px; object-fit: cover; box-shadow:0 2px 6px rgba(0,0,0,.08); background:#f2f6fb; }
+.item-name{ flex:1 }
+.item-note{ color:var(--text-muted); font-size:12px; }
+
 /* Tags: playful colors */
 .tag{ background:#eef5ff; color:#0b6ee6; }
 .tag.rule{ background:#fff4e6; color:#9a6100; }
