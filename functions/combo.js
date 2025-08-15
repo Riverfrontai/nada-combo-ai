@@ -35,11 +35,12 @@ function sanitizeInput(body){
   const partySize = Math.min(10, Math.max(1, Number(body.partySize)||1));
   const budget = null; // UI removed for now
   const diet = Array.isArray(body.diet)? body.diet.slice(0,5): [];
+  const seafoodOK = diet.includes('seafood_ok');
   const spice = ['mild','medium','hot'].includes(body.spice)? body.spice:'medium';
   const alcohol = ['any','na','cocktail','beer','wine'].includes(body.alcohol)? body.alcohol:'any';
   const portionPref = ['light','filling'].includes(body.portionPref) ? body.portionPref : 'light';
   const _variant = Number.isFinite(Number(body._variant)) ? Math.max(0, Math.min(99, Number(body._variant))) : 0;
-  return { meal, partySize, budget, diet, spice, alcohol, portionPref, _variant };
+  return { meal, partySize, budget, diet, seafoodOK, spice, alcohol, portionPref, _variant };
 }
 
 // Compose a scoped view that pulls from the selected meal with sensible fallbacks
@@ -86,7 +87,13 @@ function prefilter(menuRoot, prefs){
     if (cat.startsWith('_')) continue; // skip meta
     if (!Array.isArray(filtered[cat])) continue;
     let arr = filtered[cat];
-    if (isVeg) arr = arr.filter(i => (i.tags||[]).includes('vegetarian'));
+    if (isVeg){
+      if (prefs.seafoodOK) {
+        arr = arr.filter(i => (i.tags||[]).includes('vegetarian') || (i.tags||[]).includes('seafood'));
+      } else {
+        arr = arr.filter(i => (i.tags||[]).includes('vegetarian'));
+      }
+    }
     if (glutenSensitive) arr = arr.filter(i => !hasAllergen(i,'gluten'));
     filtered[cat] = arr;
   }
@@ -309,6 +316,7 @@ function contextBoost(state, prefs){
   const has = t=>tags.includes(t);
   if (prefs.portionPref === 'light') { if (has('fresh')) boost+=0.3; if (has('seafood')) boost+=0.2; if (has('creamy')) boost-=0.15; }
   if (prefs.portionPref === 'filling') { if (has('shareable')) boost+=0.3; if (has('cheese')) boost+=0.2; }
+  if (prefs.seafoodOK){ if (has('seafood')) boost += 0.25; else boost -= 0.15; }
   return boost;
 }
 
@@ -425,35 +433,13 @@ function generateDeterministic(menu, prefs){
 
 function diversify(cands, n){
   const picked = [];
-  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set(), entrees: new Set(), soup_salad: new Set(), quesadillas: new Set(), enchiladas: new Set() };
+  const seenNames = new Set();
   for (const c of cands){
-    const names = { tacos: [], antojitos: [], drink: [], entrees: [], soup_salad: [], quesadillas: [], enchiladas: [] };
-    for (const p of c.picks){
-      if (p.category==='tacos') names.tacos.push(p.name);
-      if (p.category==='antojitos') names.antojitos.push(p.name);
-      if (p.category==='drink') names.drink.push(p.name);
-      if (p.category==='entrees') names.entrees.push(p.name);
-      if (p.category==='soup_salad') names.soup_salad.push(p.name);
-      if (p.category==='quesadillas') names.quesadillas.push(p.name);
-      if (p.category==='enchiladas') names.enchiladas.push(p.name);
-    }
-    const overlap =
-      names.tacos.some(x=>seen.tacos.has(x)) ||
-      names.antojitos.some(x=>seen.antojitos.has(x)) ||
-      names.drink.some(x=>seen.drink.has(x)) ||
-      names.entrees.some(x=>seen.entrees.has(x)) ||
-      names.soup_salad.some(x=>seen.soup_salad.has(x)) ||
-      names.quesadillas.some(x=>seen.quesadillas.has(x)) ||
-      names.enchiladas.some(x=>seen.enchiladas.has(x));
+    const names = new Set((c.picks||[]).map(p=>p.name));
+    const overlap = [...names].some(x=>seenNames.has(x));
     if (picked.length===0 || !overlap){
       picked.push(c);
-      names.tacos.forEach(x=>seen.tacos.add(x));
-      names.antojitos.forEach(x=>seen.antojitos.add(x));
-      names.drink.forEach(x=>seen.drink.add(x));
-      names.entrees.forEach(x=>seen.entrees.add(x));
-      names.soup_salad.forEach(x=>seen.soup_salad.add(x));
-      names.quesadillas.forEach(x=>seen.quesadillas.add(x));
-      names.enchiladas.forEach(x=>seen.enchiladas.add(x));
+      names.forEach(x=>seenNames.add(x));
     }
     if (picked.length>=n) break;
   }
@@ -464,6 +450,31 @@ function prettyCat(c){
   return {
     antojitos: 'Antojitos', tacos: 'Tacos', sides:'Side', soup_salad:'Soup/Salad', fajitas:'Fajitas', quesadillas:'Quesadillas', enchiladas:'Enchiladas', desserts:'Dessert', entrees:'Entree', drink:'Drink'
   }[c] || c;
+}
+
+function signatureOfRec(rec){
+  return (rec.items||[]).map(i=>`${i.category}:${i.name}`).join('|');
+}
+
+function ensurePartySize(recs, prefs, scoped){
+  const out = [];
+  const seenNames = new Set();
+  const addIfUnique = (r)=>{
+    const names = new Set((r.items||[]).map(i=>i.name));
+    const overlap = [...names].some(n=>seenNames.has(n));
+    if (!overlap){ out.push(r); names.forEach(n=>seenNames.add(n)); return true; }
+    return false;
+  };
+  // seed existing recs
+  for (const r of recs){ if (out.length>=prefs.partySize) break; addIfUnique(r); }
+  // top up if needed using rotated variants
+  let v = (prefs._variant||0)+1; let guard=0;
+  while (out.length < prefs.partySize && guard < 12){
+    const extra = generateDeterministic(scoped, { ...prefs, _variant: v });
+    for (const r of extra){ if (out.length>=prefs.partySize) break; addIfUnique(r); }
+    v = (v + 7) % 100; guard++;
+  }
+  return out.slice(0, Math.max(1, prefs.partySize));
 }
 
 function enrichRecs(recs, prefs){
@@ -532,17 +543,18 @@ const prompt = buildPrompt(scoped, prefs);
     }
 
     if(Array.isArray(result.recommendations)){
-    result.recommendations.forEach(rec=>{
-    if(!rec.estimatePerPerson){ rec.estimatePerPerson = '—'; }
-    if(!rec.estimateTotal){ rec.estimateTotal = '—'; }
-    });
-  enrichRecs(result.recommendations, prefs);
-}
-return {
-    statusCode: 200,
-    headers: { 'Cache-Control': 'no-store' },
-  body: JSON.stringify(result)
-};
+      result.recommendations = ensurePartySize(result.recommendations, prefs, scoped);
+      result.recommendations.forEach(rec=>{
+        if(!rec.estimatePerPerson){ rec.estimatePerPerson = '—'; }
+        if(!rec.estimateTotal){ rec.estimateTotal = '—'; }
+      });
+      enrichRecs(result.recommendations, prefs);
+    }
+    return {
+      statusCode: 200,
+      headers: { 'Cache-Control': 'no-store' },
+      body: JSON.stringify(result)
+    };
   }catch(err){
     console.error(err && err.stack ? err.stack : err);
     return { statusCode: 500, body: 'Internal Server Error' };
