@@ -198,8 +198,6 @@ async function callOpenAI(prompt){
   const txt = await resp.text();
   console.log('OpenAI status', resp.status, txt.slice(0,400));
   if(!resp.ok){
-    if (resp.status === 429) return { recommendations: [], error: 'rate-limit' };
-    if (resp.status === 403 || resp.status === 404) return { recommendations: [], error: 'model-unavailable' };
     return { recommendations: [], error: `upstream-${resp.status}` };
   }
   try {
@@ -451,18 +449,8 @@ function prettyCat(c){
   }[c] || c;
 }
 
-// naive in-memory rate limit (best-effort)
-const hits = new Map();
-function rateLimited(ip) {
-  const now = Date.now();
-  const windowMs = 5 * 60 * 1000; // 5 minutes
-  const max = 15; // 15 requests per 5 minutes
-  const rec = hits.get(ip) || [];
-  const recent = rec.filter(t => now - t < windowMs);
-  recent.push(now);
-  hits.set(ip, recent);
-  return recent.length > max;
-}
+// rate limiting disabled per requirements
+function rateLimited(ip) { return false; }
 
 exports.handler = async (event) => {
   try{
