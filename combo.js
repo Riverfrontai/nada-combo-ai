@@ -4,6 +4,8 @@ function el(tag, cls){const e=document.createElement(tag); if(cls) e.className=c
 const form = qs('#combo-form');
 const results = qs('#results');
 const regen = qs('#regen');
+const mobileGenerate = qs('#mobile-generate');
+const mobileRegen = qs('#mobile-regen');
 const toast = qs('#toast');
 const confettiRoot = qs('#confetti');
 const taglineEl = qs('#tagline');
@@ -12,7 +14,12 @@ let lastPayload = null;
 let generating = false;
 let variant = 0;
 let imageMap = {};
-regen.disabled = true;
+regen.disabled = true; // initial
+function syncCTA(){
+  if (mobileGenerate) mobileGenerate.disabled = generating;
+  if (mobileRegen) mobileRegen.disabled = generating || !lastPayload;
+  if (regen) regen.disabled = generating || !lastPayload;
+}
 
 // Load image manifest (non-blocking)
 fetch('assets/image_manifest.json').then(r=>r.ok?r.json():{}).then(j=>{ imageMap=j||{}; }).catch(()=>{});
@@ -154,7 +161,7 @@ function burstConfetti(){
 async function generate(payload){
   if(generating) return;
   generating = true;
-  regen.disabled = true;
+  syncCTA();
   renderSkeleton();
   let resp, txt;
   const start = Date.now();
@@ -177,7 +184,7 @@ async function generate(payload){
   showToast('Fresh combos are ready');
   burstConfetti();
   generating = false;
-  regen.disabled = false;
+  syncCTA();
 }
 
 const dietSel = form ? form.querySelector('select[name="diet"]') : null;
@@ -197,12 +204,31 @@ form.addEventListener('submit', (e)=>{
   };
   variant = (variant + 1) % 100;
   lastPayload = payload;
+  syncCTA();
   generate(payload);
 });
 
 regen.addEventListener('click', ()=>{
-  if(!lastPayload) return;
+  if(!lastPayload || generating) return;
   const payload = { ...lastPayload, _variant: variant };
   variant = (variant + 1) % 100;
   generate(payload);
 })
+
+if (mobileGenerate){
+  mobileGenerate.addEventListener('click', ()=>{
+    if (generating) return;
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { cancelable:true }));
+  });
+}
+if (mobileRegen){
+  mobileRegen.addEventListener('click', ()=>{
+    if(!lastPayload || generating) return;
+    const payload = { ...lastPayload, _variant: variant };
+    variant = (variant + 1) % 100;
+    generate(payload);
+  });
+}
+
+syncCTA();
