@@ -158,29 +158,45 @@ function burstConfetti(){
   }
 }
 
-async function generate(payload){
-  if(generating) return;
-  generating = true;
-  syncCTA();
-  renderSkeleton();
-  let resp, txt;
-  const start = Date.now();
-  try{
-    resp = await fetch('/.netlify/functions/combo',{
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
-    });
-  } catch(e){
-    results.innerHTML = '<div class="muted small">Network error. Please try again.</div>';
-    generating = false; regen.disabled = false; return;
-  }
-  const min = 400 - (Date.now() - start); if (min > 0) await new Promise(r=>setTimeout(r,min));
-  if(!resp.ok){
-    txt = await resp.text();
-    results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`;
-    generating = false; regen.disabled = false; return;
-  }
+let lastSig = null;
+function signatureOf(data){
+if(!data || !Array.isArray(data.recommendations)) return '';
+return data.recommendations.map(r => (r.items||[]).map(i=>`${i.category}:${i.name}`).join('|')).join('||');
+}
+
+async function generate(payload, attempt=0){
+if(generating) return;
+generating = true;
+syncCTA();
+renderSkeleton();
+let resp, txt;
+const start = Date.now();
+try{
+  resp = await fetch('/.netlify/functions/combo',{
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+  });
+} catch(e){
+results.innerHTML = '<div class="muted small">Network error. Please try again.</div>';
+generating = false; syncCTA(); return;
+}
+const min = 400 - (Date.now() - start); if (min > 0) await new Promise(r=>setTimeout(r,min));
+if(!resp.ok){
+  txt = await resp.text();
+  results.innerHTML = `<div class="muted small">Error: ${resp.status} ${txt}</div>`;
+  generating = false; syncCTA(); return;
+}
   const data = await resp.json();
+
+  const sig = signatureOf(data);
+  if (lastSig && sig === lastSig && attempt < 2){
+    variant = (variant + 7) % 100;
+    const next = { ...payload, _variant: variant };
+    generating = false; // allow re-entry
+    return generate(next, attempt+1);
+  }
+
   renderResults(payload, data);
+  lastSig = sig;
   showToast('Fresh combos are ready');
   burstConfetti();
   generating = false;
