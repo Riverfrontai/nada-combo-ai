@@ -1,125 +1,125 @@
 {
-  "version": "2.0",
-  "source": "Nadamenu.md (structured)",
+  "version": "2.1",
+  "source": "Nadamenu.md (structured + allergens)",
   "venue": "Nada Cincinnati",
   "meals": {
     "lunch": {
       "tacos": [
-        {"name": "Pork Al Pastor", "notes": "salsa verde, grilled pineapple, onion, cilantro (corn tortilla)", "tags": ["pork", "fresh"], "spice": 2},
-        {"name": "Chicken Al Carbon", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"], "spice": 2},
-        {"name": "Caramelized Cauliflower", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond (corn tortilla)", "tags": ["vegetarian", "sweet", "creamy"], "spice": 2},
-        {"name": "Baja Style (crispy shrimp)", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3},
-        {"name": "Baja Style (crispy mahi)", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3},
-        {"name": "Carne Asada", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef", "creamy"], "spice": 1}
+        {"name": "Pork Al Pastor", "notes": "salsa verde, grilled pineapple, onion, cilantro (corn tortilla)", "tags": ["pork", "fresh"], "spice": 2, "allergens": ["onion", "garlic"]},
+        {"name": "Chicken Al Carbon", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"], "spice": 2, "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Caramelized Cauliflower", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond (corn tortilla)", "tags": ["vegetarian", "sweet", "creamy"], "spice": 2, "allergens": ["dairy", "onion", "garlic", "nuts"]},
+        {"name": "Baja Style (crispy shrimp)", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3, "allergens": ["gluten*", "dairy", "onion", "garlic", "shellfish"]},
+        {"name": "Baja Style (crispy mahi)", "notes": "cabbage, chipotle mayo, pico, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "spice": 3, "allergens": ["gluten*", "dairy", "onion", "garlic", "fish"]},
+        {"name": "Carne Asada", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef", "creamy"], "spice": 1, "allergens": ["gluten*", "dairy", "onion", "garlic"]}
       ],
       "antojitos": [
-        {"name": "Chips & Salsa", "notes": "tomato ancho, serrano verde, or habanero \"kreeper\"", "tags": ["shareable", "vegan", "spicy"]},
-        {"name": "O.G. Guacamole", "notes": "avocado, onion, lime, crispy chips", "tags": ["vegetarian", "shareable", "fresh"]},
-        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija, crispy chips", "tags": ["shareable", "cheese"], "spice": 2},
-        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, ancho‑spiced pepitas", "tags": ["vegetarian", "sweet‑spicy"]},
-        {"name": "Mexico City Ceviche", "notes": "mahi, pico, serrano, lime, avocado, red diablo, plantain", "tags": ["seafood", "fresh"], "spice": 2}
+        {"name": "Chips & Salsa", "notes": "tomato ancho, serrano verde, or habanero 'kreeper'", "tags": ["shareable", "vegan", "spicy"], "allergens": ["garlic", "onion", "gluten*"]},
+        {"name": "O.G. Guacamole", "notes": "avocado, onion, lime, crispy chips", "tags": ["vegetarian", "shareable", "fresh"], "allergens": ["onion", "garlic", "gluten*"]},
+        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija, crispy chips", "tags": ["shareable", "cheese"], "spice": 2, "allergens": ["dairy", "onion", "garlic", "gluten*"]},
+        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, ancho‑spiced pepitas", "tags": ["vegetarian", "sweet‑spicy"], "allergens": ["gluten*", "onion", "garlic"]},
+        {"name": "Mexico City Ceviche", "notes": "mahi, pico, serrano, lime, avocado, red diablo, plantain", "tags": ["seafood", "fresh"], "spice": 2, "allergens": ["fish", "onion", "garlic", "gluten*"]}
       ],
       "quesadillas": [
-        {"name": "Cheese Quesadilla", "tags": ["vegetarian", "cheese"]},
-        {"name": "Chicken Quesadilla", "tags": ["chicken", "cheese"]},
-        {"name": "Steak Quesadilla", "tags": ["beef", "cheese"]}
+        {"name": "Cheese Quesadilla", "tags": ["vegetarian", "cheese"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Chicken Quesadilla", "tags": ["chicken", "cheese"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Steak Quesadilla", "tags": ["beef", "cheese"], "allergens": ["gluten*", "dairy", "onion", "garlic"]}
       ],
       "soup_salad": [
-        {"name": "Chicken Tortilla Soup", "notes": "pasilla chile, crema, avocado, onion", "tags": ["soup"], "spice": 1},
-        {"name": "Baby Kale Caesar", "notes": "Tijuana Style", "tags": ["salad"]},
-        {"name": "Ranchero Wedge", "notes": "pasilla ranch, fresno peppers, tortilla strips", "tags": ["salad"], "spice": 1}
+        {"name": "Chicken Tortilla Soup", "notes": "pasilla chile, crema, avocado, onion", "tags": ["soup"], "spice": 1, "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Baby Kale Caesar", "notes": "Tijuana Style", "tags": ["salad"], "allergens": ["dairy", "garlic", "fish", "gluten", "onion"]},
+        {"name": "Ranchero Wedge", "notes": "pasilla ranch, fresno peppers, tortilla strips", "tags": ["salad"], "spice": 1, "allergens": ["dairy", "garlic"]}
       ],
       "enchiladas": [
-        {"name": "Braised Chicken Enchiladas", "notes": "sweet corn, black bean, cheese, couscous, crema, scallion, red diablo", "tags": ["chicken", "creamy"], "spice": 2},
-        {"name": "Three Cheese Enchiladas", "notes": "ancho‑chili gravy", "tags": ["vegetarian", "cheese"], "spice": 1},
-        {"name": "Baja Seafood Enchiladas", "notes": "creamy krab, shrimp, cheese, cilantro", "tags": ["seafood", "creamy"]}
+        {"name": "Braised Chicken Enchiladas", "notes": "sweet corn, black bean, cheese, couscous, crema, scallion, red diablo", "tags": ["chicken", "creamy"], "spice": 2, "allergens": ["gluten", "dairy", "onion", "garlic"]},
+        {"name": "Three Cheese Enchiladas", "notes": "ancho‑chili gravy", "tags": ["vegetarian", "cheese"], "spice": 1, "allergens": ["gluten", "dairy", "onion", "garlic"]},
+        {"name": "Baja Seafood Enchiladas", "notes": "creamy krab, shrimp, cheese, cilantro", "tags": ["seafood", "creamy"], "allergens": ["gluten", "dairy", "onion", "garlic", "shellfish"]}
       ],
       "fajitas": [
-        {"name": "Ancho‑Crusted Chicken Fajitas", "tags": ["chicken", "sizzle"]},
-        {"name": "Shrimp Fajitas", "tags": ["seafood", "sizzle"]},
-        {"name": "Steak Asada Fajitas", "tags": ["beef", "sizzle"]},
-        {"name": "El Jefe Fajitas", "notes": "all three proteins", "tags": ["mix", "shareable", "sizzle"]}
+        {"name": "Ancho‑Crusted Chicken Fajitas", "tags": ["chicken", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Shrimp Fajitas", "tags": ["seafood", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic", "shellfish"]},
+        {"name": "Steak Asada Fajitas", "tags": ["beef", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "El Jefe Fajitas", "notes": "all three proteins", "tags": ["mix", "shareable", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic", "shellfish"]}
       ],
       "sides": [
-        {"name": "Pickled Cucumber Salad", "notes": "shaved onion, rice vinegar", "tags": ["vegetarian", "fresh", "gluten‑friendly"]},
-        {"name": "Crispy Potatoes", "notes": "sweet chili glaze, scallion, crema", "tags": ["vegetarian"]},
-        {"name": "Black Beans & Rice", "notes": "pico de gallo, cotija", "tags": ["vegetarian", "gluten‑friendly"]},
-        {"name": "Grilled Street Corn", "notes": "chili mayo, cotija, lime", "tags": ["vegetarian"]},
-        {"name": "Nada’s Mac N’ Cheese", "notes": "roasted poblano, garlic breadcrumb", "tags": ["vegetarian", "cheese", "creamy"]},
-        {"name": "Jalapeño Cheddar Cornbread", "notes": "whipped butter, sea salt, honey", "tags": ["vegetarian", "sweet"]}
+        {"name": "Pickled Cucumber Salad", "notes": "shaved onion, rice vinegar", "tags": ["vegetarian", "fresh", "gluten‑friendly"], "allergens": ["onion"]},
+        {"name": "Crispy Potatoes", "notes": "sweet chili glaze, scallion, crema", "tags": ["vegetarian"], "allergens": ["garlic", "onion", "dairy", "gluten*"]},
+        {"name": "Black Beans & Rice", "notes": "pico de gallo, cotija", "tags": ["vegetarian"], "allergens": ["dairy", "onion", "garlic", "gluten*"]},
+        {"name": "Grilled Street Corn", "notes": "chili mayo, cotija, lime", "tags": ["vegetarian"], "allergens": ["dairy", "onion"]},
+        {"name": "Nada’s Mac N’ Cheese", "notes": "roasted poblano, garlic breadcrumb", "tags": ["vegetarian", "cheese", "creamy"], "allergens": ["gluten", "dairy", "onion", "garlic"]},
+        {"name": "Jalapeño Cheddar Cornbread", "notes": "whipped butter, sea salt, honey", "tags": ["vegetarian", "sweet"], "allergens": ["gluten", "dairy", "onion"]}
       ]
     },
     "dinner": {
       "antojitos": [
-        {"name": "Chips & Salsa Trio", "notes": "tomato ancho, serrano verde, habanero \"kreeper\"", "tags": ["shareable", "vegan", "spicy"]},
-        {"name": "O.G. Guacamole", "notes": "avocado, onion, lime, tomatillo, crispy chips", "tags": ["vegetarian", "shareable", "fresh"]},
-        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija, crispy chips", "tags": ["shareable", "cheese"]},
-        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, ancho‑spiced pepita", "tags": ["vegetarian", "sweet‑spicy"]},
-        {"name": "Mexico City Ceviche", "notes": "mahi, pico, serrano, lime, avocado, red diablo, plantain", "tags": ["seafood", "fresh"], "spice": 2}
+        {"name": "Chips & Salsa Trio", "notes": "tomato ancho, serrano verde, habanero 'kreeper'", "tags": ["shareable", "vegan", "spicy"], "allergens": ["garlic", "onion", "gluten*"]},
+        {"name": "O.G. Guacamole", "notes": "avocado, onion, lime, tomatillo, crispy chips", "tags": ["vegetarian", "shareable", "fresh"], "allergens": ["onion", "garlic", "gluten*"]},
+        {"name": "¡Queso!", "notes": "pico, roasted poblano, diablo salsa, cotija, crispy chips", "tags": ["shareable", "cheese"], "allergens": ["dairy", "onion", "garlic", "gluten*"]},
+        {"name": "Crispy Brussels", "notes": "chipotle honey, pickled red onion, carrot purée, ancho‑spiced pepita", "tags": ["vegetarian", "sweet‑spicy"], "allergens": ["gluten*", "onion", "garlic"]},
+        {"name": "Mexico City Ceviche", "notes": "mahi, pico, serrano, lime, avocado, red diablo, plantain", "tags": ["seafood", "fresh"], "spice": 2, "allergens": ["fish", "onion", "garlic", "gluten*"]}
       ],
       "quesadillas": [
-        {"name": "Cheese Quesadilla", "tags": ["vegetarian", "cheese"]},
-        {"name": "Chicken Quesadilla", "tags": ["chicken", "cheese"]},
-        {"name": "Steak Quesadilla", "tags": ["beef", "cheese"]}
+        {"name": "Cheese Quesadilla", "tags": ["vegetarian", "cheese"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Chicken Quesadilla", "tags": ["chicken", "cheese"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Steak Quesadilla", "tags": ["beef", "cheese"], "allergens": ["gluten*", "dairy", "onion", "garlic"]}
       ],
       "soup_salad": [
-        {"name": "Chicken Tortilla Soup", "notes": "pasilla chile, crema, avocado, onion", "tags": ["soup"]},
-        {"name": "Baby Kale Caesar", "notes": "Tijuana Style", "tags": ["salad"]},
-        {"name": "Ranchero Wedge", "notes": "pasilla ranch, fresno peppers, tortilla strips", "tags": ["salad"], "spice": 1}
+        {"name": "Chicken Tortilla Soup", "notes": "pasilla chile, crema, avocado, onion", "tags": ["soup"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Baby Kale Caesar", "notes": "Tijuana Style", "tags": ["salad"], "allergens": ["dairy", "garlic", "fish", "gluten", "onion"]},
+        {"name": "Ranchero Wedge", "notes": "pasilla ranch, fresno peppers, tortilla strips", "tags": ["salad"], "allergens": ["dairy", "garlic"]}
       ],
       "fajitas": [
-        {"name": "Ancho‑Crusted Chicken Fajitas", "tags": ["chicken", "sizzle"]},
-        {"name": "Shrimp Fajitas", "tags": ["seafood", "sizzle"]},
-        {"name": "Steak Asada Fajitas", "tags": ["beef", "sizzle"]},
-        {"name": "El Jefe Fajitas", "tags": ["mix", "shareable", "sizzle"]}
+        {"name": "Ancho‑Crusted Chicken Fajitas", "tags": ["chicken", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Shrimp Fajitas", "tags": ["seafood", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic", "shellfish"]},
+        {"name": "Steak Asada Fajitas", "tags": ["beef", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "El Jefe Fajitas", "tags": ["mix", "shareable", "sizzle"], "allergens": ["gluten*", "dairy", "onion", "garlic", "shellfish"]}
       ],
       "tacos": [
-        {"name": "Pork Al Pastor", "notes": "salsa verde, grilled pineapple, onion, cilantro (corn tortilla)", "tags": ["pork"]},
-        {"name": "Chicken Al Carbon", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"]},
-        {"name": "Caramelized Cauliflower", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond (corn tortilla)", "tags": ["vegetarian", "creamy", "sweet"]},
-        {"name": "Baja Style (crispy mahi)", "notes": "cabbage, chipotle mayo, pico de gallo, pickled red onion", "tags": ["seafood", "crispy", "spicy"]},
-        {"name": "Baja Style (crispy shrimp)", "notes": "cabbage, chipotle mayo, pico de gallo, pickled red onion", "tags": ["seafood", "crispy", "spicy"]},
-        {"name": "Carne Asada", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef", "creamy"]}
+        {"name": "Pork Al Pastor", "notes": "salsa verde, grilled pineapple, onion, cilantro (corn tortilla)", "tags": ["pork"], "allergens": ["onion", "garlic"]},
+        {"name": "Chicken Al Carbon", "notes": "ancho salsa, crema, cheese, onion", "tags": ["chicken", "creamy"], "allergens": ["gluten*", "dairy", "onion", "garlic"]},
+        {"name": "Caramelized Cauliflower", "notes": "honey‑glazed, garlic‑whipped goat cheese, scallion, fresno pepper, almond (corn tortilla)", "tags": ["vegetarian", "creamy", "sweet"], "allergens": ["dairy", "onion", "garlic", "nuts"]},
+        {"name": "Baja Style (crispy mahi)", "notes": "cabbage, chipotle mayo, pico de gallo, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "allergens": ["gluten*", "dairy", "onion", "garlic", "fish"]},
+        {"name": "Baja Style (crispy shrimp)", "notes": "cabbage, chipotle mayo, pico de gallo, pickled red onion", "tags": ["seafood", "crispy", "spicy"], "allergens": ["gluten*", "dairy", "onion", "garlic", "shellfish"]},
+        {"name": "Carne Asada", "notes": "shredded lettuce, pickled red onion, lime crema, cheese", "tags": ["beef"], "allergens": ["gluten*", "dairy", "onion", "garlic"]}
       ],
       "enchiladas": [
-        {"name": "“World Famous” Braised Chicken Enchiladas", "notes": "sweet corn, black beans, cheese, couscous, crema, scallion, red diablo sauce", "tags": ["chicken", "creamy"]},
-        {"name": "Three Cheese Enchiladas", "notes": "ancho‑chili gravy", "tags": ["vegetarian", "cheese"]},
-        {"name": "Baja Seafood Enchiladas", "notes": "creamy krab, shrimp, cheese, cilantro", "tags": ["seafood", "creamy"]}
+        {"name": "“World Famous” Braised Chicken Enchiladas", "notes": "sweet corn, black beans, cheese, couscous, crema, scallion, red diablo sauce", "tags": ["chicken", "creamy"], "allergens": ["gluten", "dairy", "onion", "garlic"]},
+        {"name": "Three Cheese Enchiladas", "notes": "ancho‑chili gravy", "tags": ["vegetarian", "cheese"], "allergens": ["gluten", "dairy", "onion", "garlic"]},
+        {"name": "Baja Seafood Enchiladas", "notes": "creamy krab, shrimp, cheese, cilantro", "tags": ["seafood", "creamy"], "allergens": ["gluten", "dairy", "onion", "garlic", "shellfish"]}
       ],
       "sides": [
-        {"name": "Pickled Cucumber Salad", "notes": "shaved onion, rice vinegar", "tags": ["vegetarian", "gluten‑friendly", "fresh"]},
-        {"name": "Nada’s Mac N’ Cheese (jalapeño)", "notes": "roasted poblano, jalapeño, garlic breadcrumb", "tags": ["vegetarian", "cheese", "creamy", "spicy"]},
-        {"name": "Black Beans & Rice", "notes": "pico de gallo, cotija", "tags": ["vegetarian", "gluten‑friendly"]},
-        {"name": "Grilled Street Corn", "notes": "chili mayo, cotija, lime", "tags": ["vegetarian"]},
-        {"name": "Crispy Potatoes", "notes": "sweet chili glaze, scallion, crema", "tags": ["vegetarian"]},
-        {"name": "Jalapeño Cheddar Cornbread", "notes": "whipped butter, sea salt, honey", "tags": ["vegetarian", "sweet"]}
+        {"name": "Pickled Cucumber Salad", "notes": "shaved onion, rice vinegar", "tags": ["vegetarian", "gluten‑friendly", "fresh"], "allergens": ["onion"]},
+        {"name": "Nada’s Mac N’ Cheese (jalapeño)", "notes": "roasted poblano, jalapeño, garlic breadcrumb", "tags": ["vegetarian", "cheese", "creamy", "spicy"], "allergens": ["gluten", "dairy", "onion", "garlic"]},
+        {"name": "Black Beans & Rice", "notes": "pico de gallo, cotija", "tags": ["vegetarian"], "allergens": ["dairy", "onion", "garlic", "gluten*"]},
+        {"name": "Grilled Street Corn", "notes": "chili mayo, cotija, lime", "tags": ["vegetarian"], "allergens": ["dairy", "onion"]},
+        {"name": "Crispy Potatoes", "notes": "sweet chili glaze, scallion, crema", "tags": ["vegetarian"], "allergens": ["garlic", "onion", "dairy", "gluten*"]},
+        {"name": "Jalapeño Cheddar Cornbread", "notes": "whipped butter, sea salt, honey", "tags": ["vegetarian", "sweet"], "allergens": ["gluten", "dairy", "onion"]}
       ],
       "desserts": [
-        {"name": "Churros", "notes": "dulce de leche dipping sauce", "tags": ["shareable", "dessert", "sweet"]},
-        {"name": "Tres Leches", "notes": "chiffon cake, three milks, red berry compote, whipped cream, cinnamon almonds", "tags": ["dessert", "creamy", "sweet"]}
+        {"name": "Churros", "notes": "dulce de leche dipping sauce", "tags": ["shareable", "dessert", "sweet"], "allergens": ["dairy", "gluten", "egg"]},
+        {"name": "Tres Leches", "notes": "chiffon cake, three milks, red berry compote, whipped cream, cinnamon almonds", "tags": ["dessert", "creamy", "sweet"], "allergens": ["dairy", "gluten", "egg", "nuts*"]}
       ]
     },
     "brunch": {
       "entrees": [
-        {"name": "Huevos Rancheros", "notes": "black beans, salsa verde, queso fresco, ancho salsa", "tags": ["vegetarian"], "spice": 2},
-        {"name": "Steak + Eggs", "notes": "grilled skirt steak, onion, bell pepper, crispy potatoes, ancho salsa", "tags": ["beef"]},
-        {"name": "Eggs Goettadicto", "notes": "English muffin, poached eggs, avocado, goetta, pico de gallo, sriracha hollandaise", "tags": ["pork", "brunch", "creamy"]},
-        {"name": "Chorizo Burrito", "notes": "three eggs, Cincinnati‑style chorizo, cheese", "tags": ["pork", "spicy"]},
-        {"name": "Veggie Burrito", "notes": "three eggs, onion, bell pepper, roasted mushroom, cheese", "tags": ["vegetarian"]},
-        {"name": "Avocado Toast", "notes": "French loaf, cherry heirloom tomato, Persian cucumber, breakfast radish, pepitas, microgreens", "tags": ["vegetarian", "fresh"]},
-        {"name": "Crème Brûlée French Toast", "notes": "whipped cream, powdered sugar, maple syrup", "tags": ["vegetarian", "sweet"]}
+        {"name": "Huevos Rancheros", "notes": "black beans, salsa verde, queso fresco, ancho salsa", "tags": ["vegetarian"], "spice": 2, "allergens": ["dairy", "garlic", "onion", "gluten*", "egg"]},
+        {"name": "Steak + Eggs", "notes": "grilled skirt steak, onion, bell pepper, crispy potatoes, ancho salsa", "tags": ["beef"], "allergens": ["onion", "garlic", "egg"]},
+        {"name": "Eggs Goettadicto", "notes": "English muffin, poached eggs, avocado, goetta, pico de gallo, sriracha hollandaise", "tags": ["pork", "brunch", "creamy"], "allergens": ["dairy", "garlic", "onion", "gluten", "egg"]},
+        {"name": "Chorizo Burrito", "notes": "three eggs, Cincinnati‑style chorizo, cheese", "tags": ["pork", "spicy"], "allergens": ["egg", "dairy"]},
+        {"name": "Veggie Burrito", "notes": "three eggs, onion, bell pepper, roasted mushroom, cheese", "tags": ["vegetarian"], "allergens": ["egg", "dairy", "onion"]},
+        {"name": "Avocado Toast", "notes": "French loaf, tomato, cucumber, radish, pepitas, microgreens", "tags": ["vegetarian", "fresh"], "allergens": ["gluten", "nuts*"]},
+        {"name": "Crème Brûlée French Toast", "notes": "whipped cream, powdered sugar, maple syrup", "tags": ["vegetarian", "sweet"], "allergens": ["dairy", "gluten", "egg"]}
       ]
     },
     "kids": {
       "items": [
-        {"name": "Cheese Quesadilla", "tags": ["vegetarian"]},
+        {"name": "Cheese Quesadilla", "tags": ["vegetarian"], "allergens": ["gluten", "dairy", "onion", "garlic"]},
         {"name": "Chicken Tenders", "tags": ["chicken"]},
-        {"name": "Creamy Mac ’n Cheese", "tags": ["vegetarian", "cheese", "creamy"]},
+        {"name": "Creamy Mac ’n Cheese", "tags": ["vegetarian", "cheese", "creamy"], "allergens": ["gluten", "dairy", "onion", "garlic"]},
         {"name": "Fried Plantains", "tags": ["vegetarian", "sweet"]},
-        {"name": "Buttered Corn", "tags": ["vegetarian"]},
-        {"name": "Curly Fries", "tags": ["vegetarian"]},
+        {"name": "Buttered Corn", "tags": ["vegetarian"], "allergens": ["dairy"]},
+        {"name": "Curly Fries", "tags": ["vegetarian", "gluten*"]},
         {"name": "Fruit Cup", "tags": ["vegetarian", "fresh"]},
-        {"name": "Crispy Fish Taco", "tags": ["seafood", "crispy"]},
+        {"name": "Crispy Fish Taco", "tags": ["seafood", "crispy"], "allergens": ["fish", "gluten*"]},
         {"name": "Roasted Chicken Taco", "tags": ["chicken"]},
         {"name": "Carne Asada Taco", "tags": ["beef"]}
       ]
@@ -174,6 +174,6 @@
       "three_tacos": 1.3,
       "fajitas_shared_for_two": 2
     },
-    "assumptions": "Beverage prices omitted; food prices not included; beverages are provided as selectable names."
+    "assumptions": "Allergens are derived from Nadamenu.md. 'gluten*' denotes cross‑contamination risk (e.g., fryer, chips)."
   }
 }

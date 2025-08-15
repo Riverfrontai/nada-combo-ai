@@ -26,16 +26,53 @@ function sanitizeInput(body){
   return { meal, dayOfWeek, timeSlot, partySize, budget, diet, spice, alcohol, _variant };
 }
 
-function prefilter(menu, prefs){
-  const scoped = menu.meals[prefs.meal];
+// Compose a scoped view that pulls from the selected meal with sensible fallbacks
+// and attaches beverages so the generator can access the full menu for drinks.
+function composeScopedMenu(menuRoot, prefs){
+  const meals = menuRoot.meals || {};
+  const base = meals[prefs.meal] || {};
+  const dinner = meals.dinner || {};
+  const fallback = (cat) => Array.isArray(base[cat]) && base[cat].length ? base[cat]
+                                : (Array.isArray(dinner[cat]) ? dinner[cat] : []);
+  const scoped = {
+    antojitos: fallback('antojitos'),
+    tacos: fallback('tacos'),
+    soup_salad: fallback('soup_salad'),
+    sides: fallback('sides'),
+    fajitas: fallback('fajitas'),
+    quesadillas: fallback('quesadillas'),
+    enchiladas: fallback('enchiladas'),
+    desserts: fallback('desserts'),
+    entrees: fallback('entrees')
+  };
+  // Attach beverages from the global beverage menu
+  const beverages = meals.beverages || {};
+  scoped._beverages = {
+    margaritas: beverages.margaritas || [],
+    cocktails: beverages.cocktails || [],
+    sangria: beverages.sangria || [],
+    beer: beverages.beer || [],
+    na: beverages.na || []
+  };
+  return scoped;
+}
+
+function hasAllergen(item, allergen){
+  return Array.isArray(item.allergens) && item.allergens.some(a => (a === allergen) || a.startsWith(allergen));
+}
+
+function prefilter(menuRoot, prefs){
+  const scoped = composeScopedMenu(menuRoot, prefs);
   const filtered = JSON.parse(JSON.stringify(scoped));
   const isVeg = prefs.diet.includes('vegetarian');
-  if(isVeg){
-    for(const cat of Object.keys(filtered)){
-      if (Array.isArray(filtered[cat])) {
-        filtered[cat] = filtered[cat].filter(i => (i.tags||[]).includes('vegetarian'));
-      }
-    }
+  const glutenSensitive = prefs.diet.includes('gluten');
+  for(const cat of Object.keys(filtered)){
+    if (cat.startsWith('_')) continue; // skip meta
+    if (!Array.isArray(filtered[cat])) continue;
+    let arr = filtered[cat];
+    if (isVeg) arr = arr.filter(i => (i.tags||[]).includes('vegetarian'));
+    if (glutenSensitive) arr = arr.filter(i => !hasAllergen(i,'gluten'));
+    filtered[cat] = arr;
   }
   return filtered;
 }
@@ -83,7 +120,7 @@ function buildRuleCombos(menu, prefs){
     };
     const e1 = pickBy(entrees); if (e1) a.items.push({ category: 'Entree', name: e1.name });
     const s1 = pickBy(sides);   if (s1) a.items.push({ category: 'Side', name: s1.name });
-    a.items.push({ category: 'Drink', name: alcohol === 'na' ? 'Nada Lemonade' : 'Nadarita' });
+    a.items.push({ category: 'Drink', name: chooseDrink(prefs, menu) });
     combos.push(a);
 
     const b = {
@@ -110,7 +147,7 @@ function buildRuleCombos(menu, prefs){
   const st = pickBy(antojitos); if (st) a.items.push({ category: 'Antojitos', name: st.name });
   const tt = pickBy(tacos);     if (tt) a.items.push({ category: 'Tacos', name: tt.name, note: 'pair' });
   const ss = pickBy(sides);     if (ss) a.items.push({ category: 'Side', name: ss.name });
-  a.items.push({ category: 'Drink', name: alcohol === 'na' ? 'Nada Lemonade' : 'Nadarita' });
+  a.items.push({ category: 'Drink', name: chooseDrink(prefs, menu) });
   if (a.items.length >= 2) combos.push(a);
 
   // Combo B: Soup/Salad + Tacos + Side
@@ -227,19 +264,32 @@ function itemsByCategory(menu, alcohol){
     entrees: menu.entrees||[],
     drink: []
   };
+  // keep a reference to beverages for chooseDrink
+  map._beverages = menu._beverages || { margaritas:[], cocktails:[], sangria:[], beer:[], na:[] };
   return map;
 }
 
-function chooseDrink(prefs){
-  if (prefs.alcohol === 'na') return 'Nada Lemonade';
+function chooseDrink(prefs, scoped){
+  // Select from real beverage lists when available
+  const b = (scoped && scoped._beverages) ? scoped._beverages : { margaritas:[], cocktails:[], sangria:[], beer:[], na:[] };
+  const v = prefs._variant || 0;
+  if (prefs.alcohol === 'na') {
+    const pool = b.na.length ? b.na : [{name:'Nada Lemonade'},{name:'Pink Grapefruit Soda'},{name:'Topo Chico'}];
+    return pool[(v) % pool.length].name || pool[(v) % pool.length];
+  }
   const slot = prefs.timeSlot;
-  const happy = ['Nadarita','Sangria Rojo','Rhinegeist Juicy Truth'];
-  const dinner = ['Nadarita','Mezcal Margarita','Sangria Blanco'];
-  const late = ['Nadarita','Corona','Modelo Especial'];
-  const lunch = ['Pink Grapefruit Soda','Topo Chico','Jarritos (grapefruit/mandarin/pineapple)'];
-  const pool = slot==='happy_hour'? happy : slot==='late'? late : slot==='lunch'? lunch : dinner;
-  const idx = (Math.max(0, (prefs.partySize||1)-1) + (prefs._variant||0)) % pool.length;
-  return pool[idx];
+  const beer = b.beer.map(x=>x.name);
+  const margs = b.margaritas.map(x=>x.name);
+  const cocktails = b.cocktails.map(x=>x.name);
+  const sangria = b.sangria.map(x=>x.name);
+  let pool = [];
+  if (prefs.alcohol === 'beer') pool = beer.length? beer : ['Corona','Modelo Especial'];
+  else if (prefs.alcohol === 'cocktail') pool = cocktails.length? cocktails : ['Mezcal Margarita','Bonfire'];
+  else if (prefs.alcohol === 'wine') pool = sangria.length? sangria : ['Sangria Blanco','Sangria Rojo'];
+  else pool = (slot==='happy_hour'? (margs.length? margs : ['Nadarita','Sangria Rojo','Rhinegeist Juicy Truth'])
+                    : slot==='late'? (beer.length? beer : ['Corona','Modelo Especial'])
+                    : (margs.length? margs : ['Nadarita','Mezcal Margarita','Sangria Blanco']));
+  return pool[(v) % pool.length];
 }
 
 function varietyScore(tags){
@@ -344,7 +394,9 @@ function generateDeterministic(menu, prefs){
     templates = [
       ['antojitos','tacos','sides','drink'],
       ['soup_salad','tacos','sides','drink'],
-      ['antojitos','fajitas','drink']
+      ['antojitos','fajitas','drink'],
+      ['quesadillas','tacos','drink'],
+      ['enchiladas','sides','drink']
     ];
     if (hasDesserts) templates.push(['antojitos','tacos','desserts','drink']);
   }
@@ -361,7 +413,7 @@ function generateDeterministic(menu, prefs){
       for (const s of beam){
         if ((opts||[]).length===0){
           if (cat==='drink'){
-            const pseudo = { name: chooseDrink(prefs), tags: [] };
+            const pseudo = { name: chooseDrink(prefs, menu), tags: [] };
             const s2 = addPick(s, cat, pseudo, prefs);
             if (feasiblePartial(s2, prefs)) next.push(s2);
           }
@@ -389,22 +441,26 @@ function generateDeterministic(menu, prefs){
 
 function diversify(cands, n){
   const picked = [];
-  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set(), entrees: new Set(), soup_salad: new Set() };
+  const seen = { tacos: new Set(), antojitos: new Set(), drink: new Set(), entrees: new Set(), soup_salad: new Set(), quesadillas: new Set(), enchiladas: new Set() };
   for (const c of cands){
-    const names = { tacos: [], antojitos: [], drink: [], entrees: [], soup_salad: [] };
+    const names = { tacos: [], antojitos: [], drink: [], entrees: [], soup_salad: [], quesadillas: [], enchiladas: [] };
     for (const p of c.picks){
       if (p.category==='tacos') names.tacos.push(p.name);
       if (p.category==='antojitos') names.antojitos.push(p.name);
       if (p.category==='drink') names.drink.push(p.name);
       if (p.category==='entrees') names.entrees.push(p.name);
       if (p.category==='soup_salad') names.soup_salad.push(p.name);
+      if (p.category==='quesadillas') names.quesadillas.push(p.name);
+      if (p.category==='enchiladas') names.enchiladas.push(p.name);
     }
     const overlap =
       names.tacos.some(x=>seen.tacos.has(x)) ||
       names.antojitos.some(x=>seen.antojitos.has(x)) ||
       names.drink.some(x=>seen.drink.has(x)) ||
       names.entrees.some(x=>seen.entrees.has(x)) ||
-      names.soup_salad.some(x=>seen.soup_salad.has(x));
+      names.soup_salad.some(x=>seen.soup_salad.has(x)) ||
+      names.quesadillas.some(x=>seen.quesadillas.has(x)) ||
+      names.enchiladas.some(x=>seen.enchiladas.has(x));
     if (picked.length===0 || !overlap){
       picked.push(c);
       names.tacos.forEach(x=>seen.tacos.add(x));
@@ -412,10 +468,11 @@ function diversify(cands, n){
       names.drink.forEach(x=>seen.drink.add(x));
       names.entrees.forEach(x=>seen.entrees.add(x));
       names.soup_salad.forEach(x=>seen.soup_salad.add(x));
+      names.quesadillas.forEach(x=>seen.quesadillas.add(x));
+      names.enchiladas.forEach(x=>seen.enchiladas.add(x));
     }
     if (picked.length>=n) break;
   }
-  // Do NOT backfill with duplicates; return what we have
   return picked;
 }
 
