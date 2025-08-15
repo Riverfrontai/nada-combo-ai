@@ -69,6 +69,12 @@ function thumbFor(item){
   return ICONS['Side'];
 }
 
+function safeURL(p){
+  if(!p) return p;
+  if (p.startsWith('data:')) return p;
+  return p.split('/').map(encodeURIComponent).join('/');
+}
+
 function findHero(rec){
   const items = rec.items || [];
   for(const it of items){
@@ -92,7 +98,7 @@ function renderResults(payload, data){
     const hero = findHero(rec);
     if (hero) {
       const img = el('img','rec-img');
-      img.src = hero; img.alt = rec.title || 'AI Combo';
+      img.src = safeURL(hero); img.alt = rec.title || 'AI Combo';
       card.appendChild(img);
     }
 
@@ -107,7 +113,7 @@ function renderResults(payload, data){
     const list = el('div');
     (rec.items||[]).forEach(item=>{
       const row = el('div','item-row');
-      const img = el('img','item-thumb'); img.src = thumbFor(item); img.alt = item.category;
+      const img = el('img','item-thumb'); img.src = safeURL(thumbFor(item)); img.alt = item.category;
       const name = el('div','item-name'); name.textContent = `${item.category}: ${item.name}`;
       const note = item.note ? el('div','item-note') : null; if (note){ note.textContent = item.note; }
       row.appendChild(img); row.appendChild(name); if(note) row.appendChild(note);
