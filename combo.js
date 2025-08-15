@@ -11,7 +11,11 @@ const taglineEl = qs('#tagline');
 let lastPayload = null;
 let generating = false;
 let variant = 0;
+let imageMap = {};
 regen.disabled = true;
+
+// Load image manifest (non-blocking)
+fetch('assets/image_manifest.json').then(r=>r.ok?r.json():{}).then(j=>{ imageMap=j||{}; }).catch(()=>{});
 
 const taglines = [
   'Perfect pairings, zero guesswork.',
@@ -43,6 +47,16 @@ function renderSkeleton(){
   }
 }
 
+function findHero(rec){
+  const items = rec.items || [];
+  for(const it of items){
+    if ((it.category||'').toLowerCase()==='drink') continue;
+    const p = imageMap[it.name];
+    if (p) return p;
+  }
+  return null;
+}
+
 function renderResults(payload, data){
   results.innerHTML = '';
   if(!data || !Array.isArray(data.recommendations) || data.recommendations.length===0){
@@ -50,6 +64,14 @@ function renderResults(payload, data){
   }
   data.recommendations.forEach((rec, idx)=>{
     const card = el('div','rec-card');
+
+    const hero = findHero(rec);
+    if (hero) {
+      const img = el('img','rec-img');
+      img.src = hero; img.alt = rec.title || 'Combo image';
+      card.appendChild(img);
+    }
+
     const title = el('h4'); title.textContent = rec.title || 'Chef-picked Combo'; card.appendChild(title);
     if(rec.tags){
       const tags = el('div');
