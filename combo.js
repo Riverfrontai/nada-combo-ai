@@ -113,10 +113,17 @@ function renderResults(payload, data){
     const list = el('div');
     (rec.items||[]).forEach(item=>{
       const row = el('div','item-row');
-      const img = el('img','item-thumb'); img.src = safeURL(thumbFor(item)); img.alt = item.category;
+      const img = el('img','item-thumb'); img.src = safeURL(thumbFor(item)); img.alt = `${item.category}: ${item.name}`;
+      const text = el('div','item-text');
       const name = el('div','item-name'); name.textContent = `${item.category}: ${item.name}`;
-      const note = item.note ? el('div','item-note') : null; if (note){ note.textContent = item.note; }
-      row.appendChild(img); row.appendChild(name); if(note) row.appendChild(note);
+      text.appendChild(name);
+      if (item.ingredients){
+        const ing = el('div','item-ing'); ing.textContent = item.ingredients; text.appendChild(ing);
+      }
+      if (item.note){
+        const note = el('div','item-note'); note.textContent = item.note; text.appendChild(note);
+      }
+      row.appendChild(img); row.appendChild(text);
       list.appendChild(row);
     });
     card.appendChild(list);
@@ -124,7 +131,7 @@ function renderResults(payload, data){
     const p = el('div','small');
     p.textContent = `Est. per person: ${rec.estimatePerPerson ?? '—'} | Est. total: ${rec.estimateTotal ?? '—'}`;
     card.appendChild(p);
-    const r = el('div','muted small'); r.textContent = rec.rationale || ''; card.appendChild(r);
+    const r = el('div','muted small'); r.textContent = rec.why || rec.rationale || ''; card.appendChild(r);
     card.style.animationDelay = `${idx*60}ms`;
     results.appendChild(card);
   });

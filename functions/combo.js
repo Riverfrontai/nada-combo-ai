@@ -13,6 +13,23 @@ function loadMenu(){
   return MENU_JSON;
 }
 
+// Build a name -> item index for fast enrichment (notes/tags/allergens)
+let ITEM_INDEX = null;
+function buildIndex(menuRoot){
+  if (ITEM_INDEX) return ITEM_INDEX;
+  ITEM_INDEX = new Map();
+  const crawl = (obj)=>{
+    if (Array.isArray(obj)){
+      obj.forEach(i=>{ if (i && i.name) ITEM_INDEX.set(i.name, i); });
+    } else if (obj && typeof obj === 'object'){
+      Object.values(obj).forEach(crawl);
+    }
+  };
+  crawl(menuRoot.meals);
+  if (menuRoot.meals && menuRoot.meals.beverages) crawl(menuRoot.meals.beverages);
+  return ITEM_INDEX;
+}
+
 function sanitizeInput(body){
   const meal = ['lunch','dinner','brunch'].includes(body.meal)? body.meal : 'dinner';
   const partySize = Math.min(10, Math.max(1, Number(body.partySize)||1));
@@ -449,6 +466,37 @@ function prettyCat(c){
   }[c] || c;
 }
 
+function enrichRecs(recs, prefs){
+  const idx = ITEM_INDEX;
+  const whyFor = (recTags, aggTags) => {
+    const parts = [];
+    if (prefs.portionPref==='light') parts.push('lighter portions & fresh flavors');
+    if (prefs.portionPref==='filling') parts.push('heartier shareables');
+    if (prefs.diet && prefs.diet.includes('vegetarian')) parts.push('100% vegetarian');
+    if (prefs.diet && prefs.diet.includes('gluten')) parts.push('gluten‑sensitive friendly');
+    if (prefs.alcohol==='na') parts.push('non‑alcoholic drink');
+    if (aggTags.has('seafood')) parts.push('seafood highlight');
+    if (aggTags.has('creamy')) parts.push('creamy indulgence');
+    if (aggTags.has('fresh')) parts.push('crisp & fresh picks');
+    if (aggTags.has('shareable')) parts.push('easy to share');
+    return 'Why this combo: ' + (parts.length? parts.join(', ') : 'balanced variety') + '.';
+  };
+
+  recs.forEach(rec=>{
+    const aggTags = new Set();
+    (rec.items||[]).forEach(it=>{
+      const info = idx && idx.get(it.name);
+      if (info){
+        it.ingredients = info.notes || '';
+        it.tags = info.tags || [];
+        it.allergens = info.allergens || [];
+        (info.tags||[]).forEach(t=>aggTags.add(t));
+      }
+    });
+    rec.why = rec.why || whyFor(rec.tags||[], aggTags);
+  });
+}
+
 // rate limiting disabled per requirements
 function rateLimited(ip) { return false; }
 
@@ -464,8 +512,9 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body||'{}');
     const prefs = sanitizeInput(body);
     const fullMenu = loadMenu();
-    const scoped = prefilter(fullMenu, prefs);
-    const prompt = buildPrompt(scoped, prefs);
+buildIndex(fullMenu);
+const scoped = prefilter(fullMenu, prefs);
+const prompt = buildPrompt(scoped, prefs);
 
     const useGenExplicit = (process.env.USE_GENERATOR || 'false') === 'true';
     const useGen = useGenExplicit || !process.env.OPENAI_API_KEY; // auto-fallback if no key
@@ -483,16 +532,17 @@ exports.handler = async (event) => {
     }
 
     if(Array.isArray(result.recommendations)){
-      result.recommendations.forEach(rec=>{
-        if(!rec.estimatePerPerson){ rec.estimatePerPerson = '—'; }
-        if(!rec.estimateTotal){ rec.estimateTotal = '—'; }
-      });
-    }
-    return {
-      statusCode: 200,
-      headers: { 'Cache-Control': 'no-store' },
-      body: JSON.stringify(result)
-    };
+    result.recommendations.forEach(rec=>{
+    if(!rec.estimatePerPerson){ rec.estimatePerPerson = '—'; }
+    if(!rec.estimateTotal){ rec.estimateTotal = '—'; }
+    });
+  enrichRecs(result.recommendations, prefs);
+}
+return {
+    statusCode: 200,
+    headers: { 'Cache-Control': 'no-store' },
+  body: JSON.stringify(result)
+};
   }catch(err){
     console.error(err && err.stack ? err.stack : err);
     return { statusCode: 500, body: 'Internal Server Error' };
